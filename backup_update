@@ -28,7 +28,7 @@ for MNT in /media/*/*; do
 				diff -W 500 -y /tmp/${DIR}.list /home/cjd/Sync/Config/Backup/${DIR}.list | grep "<" | cut -f1 -d: >>/tmp/${DIR}.diff
 				ionice -c 3 rsync --verbose --progress --files-from=/tmp/${DIR}.diff -a /tank/${DIR}/ "${MNT}"/${DIR}/
 				declare RES_${DIR}=$?
-				#rm /tmp/${DIR}.diff /tmp/${DIR}.list 2>/dev/null
+				rm /tmp/${DIR}.diff /tmp/${DIR}.list 2>/dev/null
 				popd || exit
 			fi
 		done
