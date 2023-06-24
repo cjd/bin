@@ -1,0 +1,6 @@
+#!/bin/sh
+echo Watching for dnsmasq-dhcp
+if [ "`hostname`" = "piserve" ]
+then docker exec -it pihole tail -f /var/log/pihole.log|grep dnsmasq-dhcp
+else ssh -t piserve docker exec -it pihole tail -f /var/log/pihole.log|grep dnsmasq-dhcp
+fi 

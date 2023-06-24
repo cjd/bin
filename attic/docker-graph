@@ -1,0 +1,20 @@
+#!/bin/bash
+mkdir /tmp/docker-graph
+rm /tmp/docker-graph/*
+cd /tmp/docker-graph
+for HOST in vps dock jimbob piserve c3 arm
+  do for STACK in /export/Backups/${HOST}/current/Docker-Data/* /export/Backups/${HOST}/current/*
+    do STACKNAME=`basename $STACK`
+    rm docker-compose.dot 2>/dev/null
+    cp $STACK/docker-compose.y* ./docker-compose.yml 2>/dev/null
+    if [ -e 'docker-compose.yml' ]
+    then echo Building ${HOST}-${STACKNAME}
+      docker run --rm -it --name dcv -v $(pwd):/input pmsipilot/docker-compose-viz render -m dot docker-compose.yml
+      sed --in-place -e 's/shape="folder"/shape="folder" style="filled" fillcolor="#aaffaa"/g' -e 's/shape="circle"/shape="circle" style="filled" fillcolor="#ffaaaa"/g' -e 's/shape="component"/shape="component" style="filled" fillcolor="#aaaaff"/g' docker-compose.dot
+      sfdp -Tsvg docker-compose.dot > /tmp/docker-graph/${HOST}-${STACKNAME}.svg 
+      rm docker-compose.yml 2>/dev/null
+      rm docker-compose.dot 2>/dev/null
+    fi
+  done
+done
+#scp cjd@jimbob:/export/Backups/*/current/Docker-Data/docker-compose.* 

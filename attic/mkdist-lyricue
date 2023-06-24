@@ -1,0 +1,101 @@
+#!/bin/bash
+cd ~/git/lyricue
+CHANGELOG=debian/changelog
+VERSION=`head -1 ${CHANGELOG} |sed -e 's/^.*(\(.*\)).*$/\1/g'|sed -e 's/^.://g'`
+CONV="s/##VERSION##/${VERSION}/g"
+
+if [ "$1" = "build" ]
+then echo "Building"
+  LC_ALL=C;export LC_ALL
+
+  sed --in-place -e $CONV src/lyricue 
+
+  for DIST in xenial trusty vivid yakkety zesty artful
+  do echo Building for ${DIST}
+
+  if [ "$DIST" != "xenial" ]
+  then cat ${CHANGELOG} | head -1 | sed -e "s/xenial/$DIST/g" -e "s/)/${DIST})/g"  > debian/changelog-new
+  echo "" >> debian/changelog-new
+  echo "  * Build for ${DIST}" >> debian/changelog-new
+  echo "" >> debian/changelog-new
+  echo " -- Chris Debenham <chris@adebenham.com> " `date -R` >> debian/changelog-new
+  echo "" >> debian/changelog-new
+  cat $CHANGELOG >> debian/changelog-new
+  mv debian/changelog-new debian/changelog
+  fi
+  bzr-buildpackage -S
+  bzr revert debian/changelog
+  done
+
+  bzr revert src/lyricue
+  bzr revert help/lyricue.xml
+  rm src/lyricue.~*~
+  rm help/lyricue.xml.~*~
+  rm debian/changelog.~*~
+  
+elif [ "$1" = "release" ]
+then echo "Releasing"
+  echo Update archive
+  VER=`echo $VERSION | sed -e 's/-[0-9]//g'`
+  cp ../lyricue_${VER}.orig.tar.gz /var/www/lyricue/archive/lyricue_${VER}.tar.gz
+  pushd /var/www/lyricue/archive
+  echo "<html><body><h1>Lyricue source archive</h1><table>" > index.php
+
+  echo "<tr><td>Size</td><td>Filename</td></tr>" >> index.php
+  echo "<tr><td colspan=2><h2>Lyricue Source</h2></td></tr>" >> index.php
+  for F in `ls -r lyricue*`
+  do SIZE=`du -k $F | cut -f1`K
+  echo "<tr><td>${SIZE}</td><td><a href='${F}'>${F}</a></td></tr>" >> index.php
+  done
+
+  echo "<tr><td colspan=2><h2>Precue Source</h2></td></tr>" >> index.php
+  for F in `ls -r precue*`
+  do SIZE=`du -k $F | cut -f1`K
+  echo "<tr><td>${SIZE}</td><td><a href='${F}'>${F}</a></td></tr>" >> index.php
+  done
+  
+  echo "<tr><td colspan=2><h2>Others</h2></td></tr>" >> index.php
+  for F in `ls -r |grep -v "^precue" | grep -v "^lyricue"`
+  do SIZE=`du -k $F | cut -f1`K
+  echo "<tr><td>${SIZE}</td><td><a href='${F}'>${F}</a></td></tr>" >> index.php
+  done
+  
+  popd
+  
+  echo Rebuild documentation
+  cp help/lyricue.xml /var/www/lyricue/documentation
+  pushd /var/www/lyricue/documentation
+  sed --in-place -e $CONV lyricue.xml
+  ./build_wp.sh
+  popd
+  # Put things back to how they were
+  CHANGES=`ls ../*.changes | LC_ALL=C sort`
+  echo dput ppa:chris-debenham/lyricue $CHANGES 
+  echo -n "Upload release (y/n)? "
+  read line
+  if [ "$line" = "y" ]
+    then dput ppa:chris-debenham/lyricue $CHANGES
+  fi
+  unison-gtk website-lyricue
+
+elif [ "$1" = "post" ]
+then VER=`echo $VERSION | sed -e 's/-[0-9]//g'`
+  echo "Posting Version $VER"
+  POST="/tmp/blog_post"
+  echo "&lt;i&gt;" `date` "&lt;/i&gt;&lt;br/&gt;" > $POST
+  echo "Lyricue $VER has been released with the following changes:" >> $POST
+  echo "&lt;ul&gt;" >> $POST
+  tail -n +2 $CHANGELOG | head -n 20 |
+  while read line
+    do if [ "`echo $line | grep '^--'`" != "" ]
+      then break
+    fi
+    echo "$line"
+  done |sed -e 's/^\*\(.*\)$/\&lt;li\&gt;\1\&lt;\/li\&gt;/g'  >> $POST
+  echo "&lt;/ul&gt;" >> $POST
+  echo "Download the source from &lt;a href=\"http://www.lyricue.org/archive/lyricue_${VER}.tar.gz\"&gt;www.lyricue.org/archive/lyricue_${VER}.tar.gz&lt;/a&gt;&lt;br/%gt;" >> $POST
+  echo "Or install from the PPA - See &lt;a href=\"https://launchpad.net/~chris-debenham/+archive/lyricue\"&gt;https://launchpad.net/~chris-debenham/+archive/lyricue&lt;/a&gt; for details on how to do this&lt;br/%gt;" >> $POST
+  cli-poster.sh -o post -c "Lyricue releases" -p post -T "Lyricue $VER released" -v < $POST
+  rm $POST
+else echo "Valid commands: build, release, post"
+fi

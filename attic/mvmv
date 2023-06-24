@@ -1,0 +1,4 @@
+#!/bin/sh
+NAME=`echo $1 | sed -e 's/).*$/)/g'`
+mkdir "/tank/Movies/$NAME"
+mv "$1" "/tank/Movies/$NAME"

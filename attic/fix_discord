@@ -1,0 +1,6 @@
+#!/bin/bash
+dpkg-deb -x $1 unpack
+dpkg-deb --control $1
+mv DEBIAN unpack
+sed --in-place -e 's/libappind/libayatana-appind/g' unpack/DEBIAN/control
+dpkg -b unpack discord-fixed.deb

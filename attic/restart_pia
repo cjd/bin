@@ -1,0 +1,3 @@
+#!/bin/sh
+cd ~/Docker-Data/vpn
+docker compose restart
