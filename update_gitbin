@@ -1,0 +1,29 @@
+#!/bin/bash
+BASE=/tmp/gitbin.$$
+mkdir $BASE
+cd $BASE || exit
+for REPO in sharkdp/bat jesseduffield/lazygit stern/stern derailed/k9s aristocratos/btop dandavision/delta
+  do for DOWN in $(curl -s https://api.github.com/repos/${REPO}/releases/latest |grep "download_url" |grep -i linux | sed -e 's/^.*\(https.*\)".*$/\1/g')
+  do if (echo "$DOWN" | grep -qE "x86_64|amd64|arm64|aarch64")
+        then echo "$DOWN"
+        mkdir $BASE/down
+        cd $BASE/down || exit
+        if ( echo "$DOWN" | grep -qE "bz$" )
+        then (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+        else (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+        fi
+        (curl -L "$DOWN" | tar xf -) 2>/dev/null
+        FILES=$(file ./* .*/* .*/*/* | awk -F':' '/ELF/ {print $1}')
+        if [ -n "$FILES" ]
+          then echo "$FILES"
+          if (echo "$DOWN" | grep -qE "arm64|aarch64")
+          then ARCH=aarch64
+          else ARCH=x86_64
+          fi
+          mv "$FILES" ~/Sync/bin/$ARCH/
+        fi
+        rm -rf $BASE/down
+    fi
+  done
+done
+#chmod +x ~/Sync/bin/*/* 2>/dev/null

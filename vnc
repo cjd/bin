@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ "$1" == "w" ]
+then vncviewer x2200-a.au.oracle.com
+elif [ "$1" == "gdm" ]
+then x11vnc -localhost -display :0 -auth /var/lib/gdm/:0.Xauth
+elif [ "$1" == "mel" ]
+then x11vnc -display :0 -localhost -auth /home/mel/.Xauthority -forever -nopw
+elif [ "$1" == "mythtv" ]
+then ssh -p 230 -L localhost:5900:localhost:5900 mythtv@debenham.homeip.net x11vnc -display :0 -localhost -auth /home/mythtv/.Xauthority -forever -nopw
+fi

@@ -1,0 +1,3 @@
+#!/bin/sh
+#docker run -it -v ${PWD}:/root/tuya-convert/backups --network="host" --privileged yaoa/tuya-convert:rpizw /bin/bash
+docker run -it -v ${PWD}:/root/tuya-convert/backups --env="WLAN=wlan0" --env="AP=vtrust-flash" --env="GATEWAY=10.42.42.1" --network="host" --privileged zsek/tuya-convert:v2.4.5 /bin/bash

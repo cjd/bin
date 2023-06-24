@@ -1,0 +1,7 @@
+#!/bin/sh -x
+PATH=~/Sync/bin/x86_64/:$PATH
+cd ~/Sync/OBS/memes || exit
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then CMD=wofi; else CMD=rofi; fi
+chosen=$( (grep "Host " ~/.ssh/config | tr ' ' '\n' | grep "^[a-z]" | sort) | $CMD -dmenu -i -no-custom)
+[ -z "$chosen" ] && exit
+kitty --hold zsh -ci "TERM=tmux-256color ssh $chosen"

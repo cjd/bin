@@ -1,0 +1,37 @@
+#!/bin/bash
+xmodmap -e 'keycode 135 = Super_R' && xset -r 135
+if [ "$XDG_SESSION_TYPE" = "wayland" ];then
+  HP=$(wlr-randr|grep DP|grep HP |cut -f1 -d" ")
+  ACER=$(wlr-randr|grep DP|grep Acer |cut -f1 -d" ")
+  if [ "$1" = "safe" ]; then
+    wlr-randr --output eDP-1 --on
+    exit
+  fi
+  wlr-randr --output eDP-1 --off --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
+else
+  xrandr --auto
+  sleep 2
+  if [ "$1" = "safe" ]
+    then xrandr --output eDP-1 --primary --mode 1920x1200
+    exit
+  fi
+  
+  if [ "$(grep closed /proc/acpi/button/lid/LID/state)" ]
+  then CMD="--output eDP-1 --off"
+  else CMD="--output eDP-1 --primary --mode 1920x1200"
+    LAST="eDP-1"
+    eval "xrandr $CMD"
+  fi
+  
+  export IFS=$'\n'
+  DISPLAYNAMES=$(xrandr -q|grep " connec" | cut -f1 -d" " | grep -v eDP-1)
+  for DISP in $DISPLAYNAMES
+    do if [ -z "$LAST" ]
+      then CMD="$CMD --output $DISP --preferred --primary"
+      else CMD="$CMD --output $DISP --preferred --right-of $LAST"
+    fi
+    LAST=$DISP
+  done
+  echo xrandr "$CMD"
+  eval "xrandr $CMD"
+fi

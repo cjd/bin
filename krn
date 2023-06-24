@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+NODE=$1
+shift
+IMAGE=$1
+shift
+OVERRIDE="{\"spec\": { \"nodeSelector\": {\"kubernetes.io/hostname\": \"${NODE}\"}, \"tolerations\":[{\"operator\":\"Exists\"}]}, \"template\": {\"spec\": {\"containers\": [{\"securityContext\": {\"privileged\": true}}]}}}"
+OVERRIDE="{\"spec\": { \"nodeSelector\": {\"kubernetes.io/hostname\": \"${NODE}\"}, \"tolerations\":[{\"operator\":\"Exists\"}]}}"
+kubectl run -ti --rm test-$NODE --image=$IMAGE --overrides="$OVERRIDE" -- $*

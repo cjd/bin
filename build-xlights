@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ~/git/xlights-build-docker/
+./build-xlights.sh
+mv AppImage/xL*AppImage /home/cjd/Nextcloud/Apps/appimage
+echo scp `ls -c ~/Nextcloud/Apps/appimage/xLights-* | head -1` cjd@adebenham.com:/home/cjd/xlights/

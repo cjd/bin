@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function add_item {
+  SIZE=`du -k $1|cut -f1`
+  echo "<tr>" >> index.php
+  echo -n "<td>${SIZE}K</td>" >> index.php
+  echo -n "<td><a href='$1'>$1</a><br></td>" >> index.php
+  echo -n "</tr>" >> index.php
+}
+
+cd /var/www/debian
+rm Packages.gz Sources.gz Packages.bz2 Sources.bz2 Release Release.gpg
+apt-ftparchive packages . > Packages
+apt-ftparchive sources . > Sources
+apt-ftparchive release . > /tmp/a
+gzip Packages
+gzip Sources
+mv /tmp/a Release
+gnome-gpg -abs -o Release.gpg Release
+echo Creating index.php
+echo "<html>" > index.php
+echo "<body><h1>Chris Debenhams Source Archive</h1>" >> index.php
+echo "<table>" >> index.php
+
+echo "<tr><td colspan=2 align=center><h2>Lyricue stable releases</h2></td></tr>" >> index.php
+for F in `ls lyricue_*[bz] | sort -r` ; do add_item $F; done
+
+echo "<tr><td colspan=2 align=center><h2>Precue stable releases</h2></td></tr>" >> index.php
+for F in `ls precue*[bz] | sort -r`; do add_item $F; done
+
+echo "<tr><td colspan=2 align=center><h2>Gournal releases</h2></td></tr>" >> index.php
+for F in `ls gournal*[bz] | sort -r`; do add_item $F; done
+
+echo "<tr><td colspan=2 align=center><h2>MTPFS/MTPsync releases</h2></td></tr>" >> index.php
+for F in `ls mtp*[bz] | sort -r`; do add_item $F; done
+
+echo "</table></body></html>" >> index.php
+
+cd /var/www/local/lyricue.org/archive
+echo "<html>" > index.php
+echo "<body><h1>Chris Debenhams Source Archive</h1>" >> index.php
+echo "<table>" >> index.php
+
+for F in `ls *[bz] | sort -r` ; do add_item $F; done
+
+echo "</table></body></html>" >> index.php

@@ -1,0 +1,17 @@
+#!/bin/sh
+PATH=~/Sync/bin/x86_64/:$PATH
+cd ~/Sync/OBS/memes
+if [ $XDG_SESSION_TYPE = "wayland" ]; then CMD=wofi; else CMD=rofi;fi
+chosen=$( (echo Blank;obs-cli scene list |sed -e 's/^/🎥 /g'; ls) |$CMD -dmenu -i -no-custom )
+[ -z "$chosen" ] && exit
+if [[ ${chosen::1} == "🎥" ]]
+then
+        obs-cli scene switch "${chosen:2}"
+        exit
+fi
+obs-cli scene switch "Camera"
+rm ~/Sync/OBS/memes/quickshow.gif 2>/dev/null
+ln -s "$chosen" quickshow.gif 2>/dev/null
+[ "$chosen" = "Blank" ] && exit
+sleep 1
+obs-cli scene switch "Image"

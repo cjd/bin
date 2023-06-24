@@ -1,0 +1,43 @@
+#!/bin/bash
+OPTION=""
+if [ "$1" = "-p" ]; then
+	OPTION="$1"
+	shift
+fi
+if [ -n "$1" ]; then
+	if [ -z "$TMUX" ]; then
+		tmux new-session -d "ssh -t $1 /home/cjd/Sync/bin/update_docker.sh $OPTION"
+	else
+		tmux split-window -v "ssh -t $1 /home/cjd/Sync/bin/update_docker.sh $OPTION"
+	fi
+	s=$(tmux display-message -p '#S')
+	shift
+	for i in "$@"; do
+		tmux split-window -v -t "$s" "ssh -t $i /home/cjd/Sync/bin/update_docker.sh $OPTION"
+		tmux select-layout even-vertical
+	done
+	tmux select-pane -t 0
+	tmux attach -t "$s"
+elif [ "$OPTION" = "-p" ]; then
+	docker image prune -a -f
+else
+	rm /tmp/docker_up.log 2>/dev/null
+	for DIR in ${HOME}/Docker-Data /mnt/Shared/Docker-Data; do
+		if [ -d "$DIR" ]; then
+			for DOCK in "$DIR"/*; do
+				if [ -f "$DIR/$DOCK/docker-compose.yaml" ] || [ -f "$DIR/$DOCK/docker-compose.yml" ]; then
+					pushd "$DIR/$DOCK" || return
+					docker compose pull
+					if [ "$DOCK" != "gameservers" ]; then
+						docker compose up -d 2>&1 | tee -a /tmp/docker_up.log
+					fi
+					popd || exit
+				fi
+			done
+		fi
+	done
+fi
+# shellcheck disable=2046
+echo $(hostname) updated \( $(grep created /tmp/docker_up.log 2>/dev/null | cut -f2 -d" ") \)
+rm /tmp/docker_up.log 2>/dev/null
+echo Done

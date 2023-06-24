@@ -1,0 +1,19 @@
+#!/bin/bash
+# shellcheck disable=2001
+NS=""
+if [ "$1" = "c3" ]
+  then NS="c3"; shift
+fi
+if [ "$1" = "-f" ]
+  then FOLLOW="-f"
+  shift
+  else FOLLOW=""
+fi
+if [ -z "$NS" ]
+  then K=$(kubectl get pod -A --sort-by=".status.startTime" | grep -v "^c3" | grep -E 'Running|Init|Completed' | grep $1 | tail -n1)
+  else K="$NS $(kubectl get pod -n $NS | grep -E 'Running|Init|Completed' | grep "$1" | head -n1)"
+fi
+NS=$(echo "$K" | sed -e 's/^\([^ ]*\) .*$/\1/g')
+POD=$(echo "$K" | sed -e 's/^[^ ]* *\([^ ]*\) *.*$/\1/g')
+echo Logging into "${POD}" in "${NS}" namespace
+kubectl logs $FOLLOW "$POD" -n "$NS" "$2" "$3"

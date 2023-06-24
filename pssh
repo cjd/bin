@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ -n "$1" ]
+  then END="0"
+  # shellcheck disable=2001
+  CMD=$(echo "$@"|sed -e 's/^.* -- //g')
+  if [ -z "$TMUX" ]
+    then tmux new-session -d "ssh -t $1 '$CMD'; echo Press enter to exit; read"
+    else tmux split-window -v "ssh -t $1 '$CMD'; echo Press enter to exit; read"
+  fi
+  s=$(tmux display-message -p '#S')
+  tmux set -t "$s" -g pane-border-format "###P #T"
+  tmux set -t "$s" -g pane-border-status
+  shift
+  for i in "$@"; do
+	if [ "$END" == "0" ]; 
+      then if [ "$i" == "--" ]
+        then END="1"
+        else tmux split-window -v -t "$s" "ssh -t $i '$CMD'; echo Press enter to exit; read"
+	    tmux select-layout even-vertical
+      fi
+    fi
+  done
+  tmux select-pane -t 0
+  tmux set -s -t "$s" synchronize-panes
+  tmux attach -t "$s"
+fi

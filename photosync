@@ -1,0 +1,2 @@
+#!/bin/sh
+rclone -v sync /export/Pictures/Various/2021/2021-10-Various gphotos:/upload

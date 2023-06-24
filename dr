@@ -1,0 +1,3 @@
+#!/bin/bash
+docker restart $1
+docker logs -f --since=5m $1

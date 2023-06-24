@@ -1,0 +1,6 @@
+#!/bin/sh
+xrandr --newmode "1536x864"  109.25  1536 1624 1784 2032  864 867 872 897 -hsync +vsync 2>/dev/null
+xrandr --newmode "1920x1080_60.00" 173.00 1920 2048 2248 2576 1080 1083 1088 1120 -hsync +vsync
+xrandr --addmode HDMI-1 1536x864
+xrandr --addmode HDMI-1 1920x1080_60.00
+xrandr --output HDMI-1 --left-of eDP-1 --mode 1536x864 --output eDP-1 --auto --scale .5

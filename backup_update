@@ -1,0 +1,45 @@
+#!/bin/bash
+# shellcheck disable=2154
+for MNT in /media/*/*; do
+	echo -n "Update ${MNT}? "
+	read -r CHECK
+	if [ "$CHECK" != "n" ]; then
+        for DIR in Volumes Backups Music Pictures; do
+            echo Updating $DIR
+            ionice -c 3 sudo rsync -av --delete-during --exclude 'thumbnail' --exclude '.thumbcache' --exclude 'thumbnails-digikam.db' --exclude 'thumbnails-digikam.db-journal' --exclude '.dtrash' /tank/${DIR}/ "${MNT}"/${DIR}/
+			declare RES_${DIR}=$?
+        done
+
+		for DIR in Movies Television Comics; do
+			if [ -d "${MNT}/${DIR}" ]; then
+				echo Updating ${DIR}
+				pushd /tank/${DIR}/ || exit
+				find . -type f -exec ls -s --block-size=M "{}" \; | sed -e 's/^\(.*\) \(\.\/.*\)$/\2:\1/g' | sort >/tmp/${DIR}.list
+				rm /tmp/${DIR}.diff 2>/dev/null
+				export IFS=$'\n'
+				for A in $(diff -W 500 -y /tmp/${DIR}.list ~/Sync/Config/Backup/${DIR}.list | grep "|"); do
+					# shellcheck disable=2001
+					SIZ=$(echo "$A" | sed -e 's/^.*:\([0-9]*\)*M.*:\([0-9]*\)*M.*$/\1 - \2/g')
+					B=$(($SIZ))
+					if [ ${B#-} -gt 3 ]; then
+						echo "$A" | cut -f1 -d":" >>/tmp/${DIR}.diff
+					fi
+				done
+				diff -W 500 -y /tmp/${DIR}.list /home/cjd/Sync/Config/Backup/${DIR}.list | grep "<" | cut -f1 -d: >>/tmp/${DIR}.diff
+				ionice -c 3 rsync --verbose --progress --files-from=/tmp/${DIR}.diff -a /tank/${DIR}/ "${MNT}"/${DIR}/
+				declare RES_${DIR}=$?
+				#rm /tmp/${DIR}.diff /tmp/${DIR}.list 2>/dev/null
+				popd || exit
+			fi
+		done
+	fi
+done
+echo Return codes:
+echo Volumes: "$RES_Volumes"
+echo Docker: "$RES_Backups"
+echo Pictures: "$RES_Pictures"
+echo Movies: "$RES_Movies"
+echo Television: "$RES_Television"
+echo Comics: "$RES_Comics"
+echo Music: "$RES_Music"
+echo Done

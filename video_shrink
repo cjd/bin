@@ -1,0 +1,4 @@
+#!/bin/sh
+HandBrakeCLI -Z "H.265 MKV 720p30" --all-subtitles -i "$1" -o "$1.smaller.mkv"
+mv "$1" "$1-orig.mkv"
+mv "$1.smaller.mkv" "$1"

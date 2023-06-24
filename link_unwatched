@@ -1,0 +1,17 @@
+#!/bin/bash
+cd /export/Shared/Unwatched
+rm -rf /export/Shared/Unwatched/Television/*
+rm -rf /export/Shared/Unwatched/Movies/*
+API_KEY="e126c1a48f864b11bf772327a8f6be04"
+USER_ID="1d3ed13aec904f2d947cd76213773a70"
+for ID in  `curl -s "http://localhost:8096/emby/Users/${USER_ID}/Items?api_key=${API_KEY}&userid=${USER_ID}&Recursive=true&IsPlayed=false&IncludeItemTypes=Episode,Movie&LocationType=FileSystem" | grep -Po '"Id":.*?[^\\\]",'| perl -pe 's/"Id"://; s/^"//; s/",$//'`
+do
+IFILENAME=`curl -s "http://localhost:8096/emby/Items/$ID/PlaybackInfo?api_key=${API_KEY}&userid=${USER_ID}"|grep -Po '"Path":.*?[^\\\]",' | perl -pe 's/"Path"://; s/^"//; s/",$//'|head -1`
+if [ -n "$IFILENAME" ]
+then IFILENAME=`echo $IFILENAME | sed -e "s/^SMB:\/\/JIMBOB/\/export/"`
+OPATH=`dirname "$IFILENAME" | sed -e "s/^\/export/./"`
+OFILENAME=`echo $IFILENAME | sed -e "s/^\/export/./"`
+mkdir -p "$OPATH"
+ln -s "$IFILENAME" "$OFILENAME"
+fi
+done
