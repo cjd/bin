@@ -1,0 +1,2 @@
+#!/bin/sh
+~/Nextcloud/Apps/minecraft-launcher/minecraft-launcher $*

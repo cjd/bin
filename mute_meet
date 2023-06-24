@@ -1,0 +1,2 @@
+#!/bin/sh
+xdotool search --name "Meet – .* Chrome" windowactivate --sync key ctrl+d windowactivate $(xdotool getactivewindow)

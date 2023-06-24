@@ -1,0 +1,3 @@
+#!/bin/sh
+export MESA_GL_VERSION_OVERRIDE=1.4
+~/Nextcloud/Apps/SweetHome3D-*/SweetHome3D

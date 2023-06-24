@@ -1,0 +1,2 @@
+#!/bin/bash
+curl -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d "{\"entity_id\": \"${1}\"}" https://ha.adebenham.com/api/services/$2

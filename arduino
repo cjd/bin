@@ -1,0 +1,7 @@
+#!/bin/sh
+BASE=~/Nextcloud/Apps
+chmod +x ${BASE}/arduino-*/tools-builder/ctags/5.8-arduino11/ctags
+chmod +x ${BASE}/arduino-*/arduino
+chmod +x ${BASE}/arduino-*/arduino-builder
+
+~/Nextcloud/Apps/arduino-*/arduino $*
