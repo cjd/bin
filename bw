@@ -1,7 +1,9 @@
 #!/bin/bash
+if [ ! -e ~/.bw/bw ]; then
 wget -O /tmp/bw.zip "https://vault.bitwarden.com/download/?app=cli&platform=linux"
 unzip -d ~/.bw /tmp/bw.zip bw
-~/.bw/bw config server https://home.adebenham.com/
+fi
+~/.bw/bw config server https://bw.adebenham.com/
 export BW_SESSION=`~/.bw/bw login chris@adebenham.com --raw`
 ~/.bw/bw "$@"
 ~/.bw/bw logout
