@@ -17,14 +17,14 @@ fi
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in tmux neovim git zsh htop fzf curl ripgrep openssh-server build-essential fuse luarocks; do
-	if ! dpkg-query -s $P 2>/dev/null | grep -q 'install ok'; then
+for P in tmux neovim git zsh htop fzf curl ripgrep openssh-server build-essential fuse luarocks rsync aptitude kitty-terminfo fd-find lnav grc; do
+	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
 		PKGS+="$P "
 	fi
 done
 
 if command -v Xorg >/dev/null; then
-	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring alttab aptitude rsync; do
+	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring alttab; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
@@ -94,6 +94,11 @@ for C in *; do
 	fi
 done
 
+echo Cleaning old links
+find ~ -maxdepth 1 -xtype l -exec rm "{}" \;
+find ~/.config -maxdepth 1 -xtype l -exec rm "{}" \;
+find ~/.local/share -maxdepth 1 -xtype l -exec rm "{}" \;
+
 echo Updating alternatives
 for L in ex vi view vim vimdiff; do
 	if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
@@ -136,7 +141,7 @@ function ensure_line() {
     FILE="$1"
     LINE="$2"
     if ! grep -q "^$LINE" "$FILE"
-    then echo Adding $LINE to $FILE
+    then echo Adding "$LINE" to "$FILE"
         LN=$(echo "$LINE" | sed -e 's/[ =].*$//g')
         (grep -v "$LN" "$FILE";echo "$LINE") > /tmp/$$.out
         # shellcheck disable=2024
@@ -157,7 +162,7 @@ for GRP in video libvirt audio bluetooth sudo
 do if grep -q "$GRP" /etc/group
 then if ! grep -q "$GRP.*$USER" /etc/group
 then echo Adding $USER to $GRP
-	sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
+  sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
 fi
 fi
 done
