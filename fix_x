@@ -16,9 +16,9 @@ else
     exit
   fi
   
-  if [ "$(grep closed /proc/acpi/button/lid/LID/state)" ]
+  if grep -q closed /proc/acpi/button/lid/LID/state
   then CMD="--output eDP-1 --off"
-  else CMD="--output eDP-1 --primary --mode 1920x1200"
+  else CMD="--output eDP-1 --mode 1920x1200"
     LAST="eDP-1"
     eval "xrandr $CMD"
   fi
@@ -27,11 +27,12 @@ else
   DISPLAYNAMES=$(xrandr -q|grep " connec" | cut -f1 -d" " | grep -v eDP-1)
   for DISP in $DISPLAYNAMES
     do if [ -z "$LAST" ]
-      then CMD="$CMD --output $DISP --preferred --primary"
+      then CMD="$CMD --output $DISP --preferred"
       else CMD="$CMD --output $DISP --preferred --right-of $LAST"
     fi
     LAST=$DISP
   done
+  CMD="$CMD --primary"
   echo xrandr "$CMD"
   eval "xrandr $CMD"
 fi
