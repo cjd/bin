@@ -1,26 +1,47 @@
 #!/bin/bash
-BASE=/tmp/gitbin.$$
-mkdir $BASE
-cd $BASE || exit
-for REPO in sharkdp/bat jesseduffield/lazygit stern/stern derailed/k9s aristocratos/btop dandavision/delta bootandy/dust; do
-#for REPO in sharkdp/bat; do
-	mkdir -p $BASE/$REPO
-	cd $BASE/$REPO || continue
-	curl -o release https://api.github.com/repos/${REPO}/releases/latest
-	VERSION=$(grep tag_name release | cut -f4 -d:)
-	echo "$VERSION"
+declare -A gitbin
+gitbin["bat"]="sharkdp/bat"
+gitbin["lazygit"]="jesseduffield/lazygit"
+gitbin["stern"]="stern/stern"
+gitbin["k9s"]="derailed/k9s"
+gitbin["btop"]="aristocratos/btop"
+gitbin["delta"]="dandavison/delta"
+gitbin["dust"]="bootandy/dust"
+gitbin["fzf"]="junegunn/fzf"
+gitbin["lnav"]="tstack/lnav"
+
+function grab_bin() {
+	BIN="$1"
+	REPO=${gitbin["$BIN"]}
+	mkdir -p "$BASE/$REPO"
+	cd "$BASE/$REPO" || return
+	curl -s -o release "https://api.github.com/repos/${REPO}/releases/latest"
+	VERSION=$(grep tag_name release | cut -f4 -d\")
+	RELEASED=$(grep published_at release | cut -f4 -d\")
+	RD=$(date -d "$RELEASED" +%s)
+	TD=$(date +%s)
+	echo "$REPO $VERSION - $RELEASED"
+	# check if updated in last 30 days
+	if [ $((TD - RD - (60 * 60 * 24 * 30))) -gt 0 ]; then
+		if [ -z "$2" ]; then
+			echo OLD
+			return
+		fi
+	fi
 	for ARCH in x86_64 amd64 arm64 aarch64; do
-		DOWN=$(grep "download_url" $BASE/$REPO/release | grep -i linux | grep $ARCH | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
+		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep $ARCH | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
 		if [ -n "$DOWN" ]; then
-			cd $BASE/$REPO || return
+			cd "$BASE/$REPO" || return
 			mkdir $ARCH
 			cd $ARCH || exit
 			if (echo "$DOWN" | grep -qE "bz$"); then
 				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
+			elif (echo "$DOWN" | grep -qE "zip$"); then
+				(curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
 			else
 				(curl -L "$DOWN" | tar xfz -) 2>/dev/null
 			fi
-			FILES=$(file ./* ./*/* ./*/*/* | awk -F':' '/ELF/ {print $1}')
+			FILES=$(find . -name "$BIN")
 			if [ -n "$FILES" ]; then
 				echo "$FILES"
 				if (echo "$DOWN" | grep -qE "arm64|aarch64"); then
@@ -32,7 +53,17 @@ for REPO in sharkdp/bat jesseduffield/lazygit stern/stern derailed/k9s aristocra
 			fi
 		fi
 	done
-	rm -rf $BASE/$REPO
-done
-rm -rf $BASE
+}
+
+BASE=/tmp/gitbin.$$
+mkdir $BASE
+cd $BASE || exit
+if [ -z "$1" ]; then
+	for BIN in "${!gitbin[@]}"; do
+		grab_bin "$BIN" ""
+	done
+else
+	grab_bin "$1" "$1"
+fi
+#rm -rf $BASE
 #chmod +x ~/Sync/bin/*/* 2>/dev/null
