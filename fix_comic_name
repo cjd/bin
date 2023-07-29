@@ -1,4 +1,4 @@
 #!/bin/sh
-cd /tank/Downloads || exit
+cd /tank/Downloads/Comics || exit
 for F in [MD]*/*.cb[rz];do G=$(echo "$F"|sed -e 's/GetComics.INFO//g' -e 's/([^0-9]*)//g' -e 's/ *\.c/.c/g');mv "$F" "$G";done
 for F in [MD]*Week*;do mv "$F" "$(echo "$F"|sed -e 's/^\(.*\) (\(.*\)-\(.*\)-\(20.*\)).*$/\4-\2-\3_\1/')";done
