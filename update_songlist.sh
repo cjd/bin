@@ -11,11 +11,12 @@ else
 fi
 pushd $BASEDIR || exit
 IFS=$'\n'
+echo Reorg Genres
 while read -r G; do
 	OLD=$(echo "$G" | sed -e 's/:[^:]*$//' -e 's/\//\\\//g')
 	NEW=$(echo "$G" | sed -e 's/^.*://' -e 's/\//\\\//g')
 	if [ "$OLD" != "$NEW" ]; then
-		echo "$OLD -> $NEW"
+		#echo "$OLD -> $NEW"
     {
 		echo "s/^${OLD}, \(.*:\)/${NEW}, \1/g"
 		echo "s/ ${OLD}, \(.*:\)/ ${NEW}, \1/g"
