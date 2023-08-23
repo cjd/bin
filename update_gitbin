@@ -9,6 +9,7 @@ gitbin["delta"]="dandavison/delta"
 gitbin["dust"]="bootandy/dust"
 gitbin["fzf"]="junegunn/fzf"
 gitbin["lnav"]="tstack/lnav"
+gitbin["cmctl"]="cert-manager/cert-manager"
 
 function grab_bin() {
 	BIN="$1"
