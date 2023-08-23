@@ -1,0 +1,7 @@
+#!/bin/sh
+rm /tmp/ocr.png
+sleep 1
+gnome-screenshot -a -f /tmp/ocr.png
+while [ ! -e /tmp/ocr.png ];do sleep 1;done
+tesseract /tmp/ocr.png /tmp/ocr
+gedit /tmp/ocr.txt
