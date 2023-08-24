@@ -1,13 +1,27 @@
-#!/bin/sh
+#!/usr/bin/bash
 PATH=~/Sync/bin/x86_64/:$PATH
-cd ~/Sync/OBS/memes
-if [ $XDG_SESSION_TYPE = "wayland" ]; then CMD=wofi; else CMD=rofi;fi
-chosen=$( (echo Blank;obs-cli scene list |sed -e 's/^/🎥 /g'; ls) |$CMD -dmenu -i -no-custom )
+cd ~/Sync/OBS/memes || exit
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then CMD=wofi; else CMD=rofi; fi
+chosen=$( (
+	echo "Blank"
+	obs-cli scene list | sed -e 's/^/🎥 /g'
+	ls
+) | $CMD -dmenu -i -no-custom)
 [ -z "$chosen" ] && exit
-if [[ ${chosen::1} == "🎥" ]]
-then
-        obs-cli scene switch "${chosen:2}"
-        exit
+if [[ ${chosen::1} == "🎥" ]]; then
+	if [[ ${chosen:2:4} == "Text" ]]; then
+		TEXT=$(echo "" | $CMD -dmenu -p "Enter Text for OBS" -theme-str 'listview { enabled: false;}')
+		if [ "$TEXT" ]; then
+			obs-cli label text "Overlay Text" "$TEXT"
+			obs-cli scene switch Text
+		else
+			obs-cli scene switch Camera
+		fi
+
+	else
+		obs-cli scene switch "${chosen:2}"
+	fi
+	exit
 fi
 obs-cli scene switch "Camera"
 rm ~/Sync/OBS/memes/quickshow.gif 2>/dev/null
