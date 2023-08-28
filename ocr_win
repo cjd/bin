@@ -1,7 +1,11 @@
 #!/bin/sh
 rm /tmp/ocr.png
 sleep 1
-gnome-screenshot -a -f /tmp/ocr.png
-while [ ! -e /tmp/ocr.png ];do sleep 1;done
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+	grim -g "$(slurp)" /tmp/ocr.png
+else
+	gnome-screenshot -a -f /tmp/ocr.png
+fi
+while [ ! -e /tmp/ocr.png ]; do sleep 1; done
 tesseract /tmp/ocr.png /tmp/ocr
 gedit /tmp/ocr.txt
