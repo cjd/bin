@@ -1,0 +1,24 @@
+#!/bin/bash
+REGION=""
+if [ "$1" = "-r" ]; then
+	REGION=$(slurp)
+else
+	POS=$(slurp -p | cut -f1 -d,)
+	while read -r WIN; do
+		WINX=$(echo "$WIN" | cut -f1 -d,)
+		if [ "$WINX" -le "$POS" ]; then
+			REGION=$WIN
+		fi
+	done < <(swaymsg -t get_tree | jq -r '.. | (.nodes? // empty)[] | select(.pid and .visible) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')
+fi
+if ! (swaymsg -t get_outputs | grep HEAD); then
+	swaymsg create_output
+fi
+RES=$(echo "$REGION" | awk '{print $2}')
+swaymsg "output DP-8 position 0 0"
+swaymsg "output DP-9 position 2560 0"
+swaymsg "output HEADLESS-1 resolution $RES position 4480 0"
+wl-mirror -r "$REGION" &
+while ! ( swaymsg -t get_tree | grep -q 'Wayland Output');do sleep 1;done
+swaymsg "[title=\"Wayland Output\"]" move to output HEADLESS-1
+swaymsg "[title=\"Wayland Output\"]" fullscreen
