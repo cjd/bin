@@ -1,4 +1,5 @@
 #!/bin/bash
+pkill wl-mirror
 REGION=""
 if [ "$1" = "-r" ]; then
 	REGION=$(slurp)
@@ -9,14 +10,16 @@ else
 		if [ "$WINX" -le "$POS" ]; then
 			REGION=$WIN
 		fi
-	done < <(swaymsg -t get_tree | jq -r '.. | (.nodes? // empty)[] | select(.pid and .visible) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')
+	done < <(swaymsg -t get_tree | jq -r '.. | (.nodes? // empty)[] | select(.pid and .visible) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | sort)
 fi
 if ! (swaymsg -t get_outputs | grep HEAD); then
 	swaymsg create_output
 fi
 RES=$(echo "$REGION" | awk '{print $2}')
-swaymsg "output DP-8 position 0 0"
-swaymsg "output DP-9 position 2560 0"
+HP=$(swaymsg -t get_outputs |jq '.[] | select(.serial=="6CM9481CF4") | .name')
+ACER=$(swaymsg -t get_outputs |jq '.[] | select(.serial=="TD1SA0023900") | .name ')
+swaymsg "output $HP position 0 0"
+swaymsg "output $ACER position 2560 0"
 swaymsg "output HEADLESS-1 resolution $RES position 4480 0"
 wl-mirror -r "$REGION" &
 while ! ( swaymsg -t get_tree | grep -q 'Wayland Output');do sleep 1;done

@@ -1,9 +1,13 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 # The famous "get a menu of emojis to copy" script.
 
 # Get user selection via dmenu from emoji file.
-chosen=$(cut -d ';' -f1 ~/.config/i3/emoji | rofi -dmenu -i| sed "s/ .*//")
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+chosen=$(cut -d ';' -f1 ~/.config/i3/emoji | wofi --dmenu -i | sed "s/ .*//")
+else
+chosen=$(cut -d ';' -f1 ~/.config/i3/emoji | rofi -dmenu -i | sed "s/ .*//")
+fi
 
 # Exit if none chosen.
 [ -z "$chosen" ] && exit
@@ -11,8 +15,16 @@ chosen=$(cut -d ';' -f1 ~/.config/i3/emoji | rofi -dmenu -i| sed "s/ .*//")
 # If you run this command with an argument, it will automatically insert the
 # character. Otherwise, show a message that the emoji has been copied.
 if [ -n "$1" ]; then
-	xdotool type "$chosen"
+	if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+		wtype "$chosen"
+	else
+		xdotool type "$chosen"
+	fi
+else
+	if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    echo "$chosen" | tr -d '\n' | wl-copy -p
 else
 	echo "$chosen" | tr -d '\n' | xclip -selection clipboard
-	notify-send "'$chosen' copied to clipboard." &
+  fi
+	notify-send -t 3000 -e "'$chosen' copied to clipboard." &
 fi
