@@ -1,8 +1,0 @@
-#!/bin/bash
-# MAKELINKS
-shopt -s nocaseglob
-SCRIPTDIR=$(dirname "$(realpath -s $0)")
-NAME=$(basename $0)
-BIN=$(ls -c ${SCRIPTDIR}/../appimage/${NAME}*|head -1)
-chmod +x "$BIN"
-$BIN "$@"
