@@ -10,6 +10,7 @@ gitbin["dust"]="bootandy/dust"
 gitbin["fzf"]="junegunn/fzf"
 gitbin["lnav"]="tstack/lnav"
 gitbin["cmctl"]="cert-manager/cert-manager"
+gitbin["gron"]="tomnomnom/gron"
 
 function grab_bin() {
 	BIN="$1"
