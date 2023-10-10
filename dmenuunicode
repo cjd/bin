@@ -23,6 +23,7 @@ if [ -n "$1" ]; then
 else
 	if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
     echo "$chosen" | tr -d '\n' | wl-copy -p
+    echo "$chosen" | tr -d '\n' | wl-copy
 else
 	echo "$chosen" | tr -d '\n' | xclip -selection clipboard
   fi
