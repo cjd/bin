@@ -11,6 +11,7 @@ gitbin["fzf"]="junegunn/fzf"
 gitbin["lnav"]="tstack/lnav"
 gitbin["cmctl"]="cert-manager/cert-manager"
 gitbin["gron"]="tomnomnom/gron"
+gitbin["lf"]="gokcehan/lf"
 
 function grab_bin() {
 	BIN="$1"
