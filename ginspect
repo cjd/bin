@@ -3,7 +3,7 @@ PROJ=${1%:*}
 TOKEN=${1#*:}
 gcloud config configurations create "inspect-${PROJ}"
 gcloud config configurations activate "inspect-${PROJ}"
-echo -n "$TOKEN" > /tmp/inspection-sc-purple-prod
+echo -n "$TOKEN" > /tmp/inspection-"${PROJ}"
 gcloud config set auth/authorization_token_file "/tmp/inspection-${PROJ}"
 gcloud config set core/project "${PROJ}"
 gcloud config set billing/quota_project LEGACY
