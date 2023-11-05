@@ -4,94 +4,94 @@ BASEDIR=~/Sync
 UNAME=$(uname -m)
 FORCE=""
 if [ "$1" = "force" ]; then
-	FORCE="$1"
+  FORCE="$1"
 fi
 
 if ! command -v sudo &>/dev/null; then
-	echo Installing sudo
-	su root -c "apt install sudo"
-	echo Sudo installed - you may need to relogin
-	exit
+  echo Installing sudo
+  su root -c "apt install sudo"
+  echo Sudo installed - you may need to relogin
+  exit
 fi
 
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
 for P in tmux neovim git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude kitty-terminfo foot-terminfo fd-find grc; do
-	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
-		PKGS+="$P "
-	fi
+  if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
+    PKGS+="$P "
+  fi
 done
 
 if command -v Xorg >/dev/null; then
-	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring alttab; do
-		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
-			PKGS+="$P "
-		fi
-	done
-	if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
-		echo Installing chrome
-		wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-		sudo dpkg -i ./google-chrome-stable_current_amd64.deb
-		rm ./google-chrome-stable_current_amd64.deb
-		sudo apt-get -f install
-	fi
+  for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring alttab; do
+    if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
+      PKGS+="$P "
+    fi
+  done
+  if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
+    echo Installing chrome
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo dpkg -i ./google-chrome-stable_current_amd64.deb
+    rm ./google-chrome-stable_current_amd64.deb
+    sudo apt-get -f install
+  fi
 fi
 
 if [ "$PKGS" ]; then
-	echo Installing "$PKGS"
-	# shellcheck disable=2086
-	sudo apt install $PKGS
+  echo Installing "$PKGS"
+  # shellcheck disable=2086
+  sudo apt install $PKGS
 fi
 
 echo Ensuring Sync directory exists
 if [ ! -d $BASEDIR ]; then
-	mkdir -p $BASEDIR
+  mkdir -p $BASEDIR
 fi
 
 if [ "$FORCE" ] || [ ! -d $BASEDIR/Config ]; then
-	if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
-		rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/Config/ $BASEDIR/Config
-	else
-		rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/Config/ $BASEDIR/Config
-	fi
+  if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
+    rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/Config/ $BASEDIR/Config
+  else
+    rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/Config/ $BASEDIR/Config
+  fi
 fi
 
 if [ "$FORCE" ] || [ ! -d $BASEDIR/bin ]; then
-	if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
-		rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/bin/ $BASEDIR/bin
-	else
-		rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/bin/ $BASEDIR/bin
-	fi
-	chmod -R +x $BASEDIR/bin/*
+  if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
+    rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/bin/ $BASEDIR/bin
+  else
+    rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/bin/ $BASEDIR/bin
+  fi
+  chmod -R +x $BASEDIR/bin/*
 fi
 
 echo Setting up Config files
 cd $BASEDIR/Config/dothome || exit
 for L in .[^.]*; do
-	if [ ! -L ~/"$L" ]; then
-		echo creating ~/"$L"
-		mv ~/"$L" "$HOME/$L-$DATE" 2>/dev/null
-		ln -s $BASEDIR/Config/dothome/"$L" ~/
-	fi
+  if [ ! -L ~/"$L" ]; then
+    echo creating ~/"$L"
+    mv ~/"$L" "$HOME/$L-$DATE" 2>/dev/null
+    ln -s $BASEDIR/Config/dothome/"$L" ~/
+  fi
 done
 cd $BASEDIR/Config/dotconfig || exit
 mkdir -p ~/.config
 for C in *; do
-	if [ ! -L ~/.config/"$C" ]; then
-		echo creating ~/.config/"$C"
-		mv ~/.config/"$C" ~/.config/"$C"-"$DATE" 2>/dev/null
-		ln -s $BASEDIR/Config/dotconfig/"$C" ~/.config/
-	fi
+  if [ ! -L ~/.config/"$C" ]; then
+    echo creating ~/.config/"$C"
+    mv ~/.config/"$C" ~/.config/"$C"-"$DATE" 2>/dev/null
+    ln -s $BASEDIR/Config/dotconfig/"$C" ~/.config/
+  fi
 done
 cd $BASEDIR/Config/dotlocalshare || exit
 mkdir -p ~/.local/share
 for C in *; do
-	if [ ! -L ~/.local/share/"$C" ]; then
-		echo creating ~/.local/share/"$C"
-		mv ~/.local/share/"$C" ~/.local/share/"$C"-"$DATE" 2>/dev/null
-		ln -s $BASEDIR/Config/dotlocalshare/"$C" ~/.local/share/
-	fi
+  if [ ! -L ~/.local/share/"$C" ]; then
+    echo creating ~/.local/share/"$C"
+    mv ~/.local/share/"$C" ~/.local/share/"$C"-"$DATE" 2>/dev/null
+    ln -s $BASEDIR/Config/dotlocalshare/"$C" ~/.local/share/
+  fi
 done
 
 echo Cleaning old links
@@ -101,11 +101,11 @@ find ~/.local/share -maxdepth 1 -xtype l -exec rm "{}" \;
 
 echo Updating alternatives
 for L in ex vi view vim vimdiff; do
-	if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
-		echo Update Alternatives
-		sudo update-alternatives --install /usr/bin/$L $L "$HOME/Sync/bin/$UNAME/nvim" 110
-		sudo update-alternatives --set $L "$HOME/Sync/bin/$UNAME/nvim"
-	fi
+  if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
+    echo Update Alternatives
+    sudo update-alternatives --install /usr/bin/$L $L "$HOME/Sync/bin/$UNAME/nvim" 110
+    sudo update-alternatives --set $L "$HOME/Sync/bin/$UNAME/nvim"
+  fi
 done
 
 # Clean links
@@ -113,57 +113,61 @@ rm ~/.*-"${DATE}" ~/.config/*-"${DATE}" ~/.local/share/*-"${DATE}" 2>/dev/null
 
 echo Setting shell
 if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
-	echo Set zsh as shell
-	sudo usermod -s /usr/bin/zsh "$(whoami)"
+  echo Set zsh as shell
+  sudo usermod -s /usr/bin/zsh "$(whoami)"
 fi
 
 echo Setting up syncthing
 # Setup Syncthing
 if [ ! -d ~/.syncthing ]; then
-	mkdir ~/.syncthing
-	cd ~/.syncthing || exit
-	if [ "$UNAME" = "x86_64" ]; then
-		ARCH="amd64"
-	else
-		ARCH="arm"
-	fi
-	URL=$(curl -s https://api.github.com/repos/syncthing/syncthing/releases/latest | grep "browser_download_url.*gz" | grep linux-$ARCH- | sed -e 's/^.*\(http.*gz\).*$/\1/g')
-	curl -L --output - "$URL" | tar -xvz --strip-components=1 -f -
-	mkdir -p ~/.config/systemd/user/
-	sed -e "s|usr\/bin|$(pwd)|g" ./etc/linux-systemd/user/syncthing.service >~/.config/systemd/user/syncthing.service
-	systemctl --user enable syncthing.service
-	systemctl --user start syncthing.service
-	sleep 5
-	~/.syncthing/syncthing --device-id
+  mkdir ~/.syncthing
+  cd ~/.syncthing || exit
+  if [ "$UNAME" = "x86_64" ]; then
+    ARCH="amd64"
+  else
+    ARCH="arm"
+  fi
+  URL=$(curl -s https://api.github.com/repos/syncthing/syncthing/releases/latest | grep "browser_download_url.*gz" | grep linux-$ARCH- | sed -e 's/^.*\(http.*gz\).*$/\1/g')
+  curl -L --output - "$URL" | tar -xvz --strip-components=1 -f -
+  mkdir -p ~/.config/systemd/user/
+  sed -e "s|usr\/bin|$(pwd)|g" ./etc/linux-systemd/user/syncthing.service >~/.config/systemd/user/syncthing.service
+  systemctl --user enable syncthing.service
+  systemctl --user start syncthing.service
+  sleep 5
+  ~/.syncthing/syncthing --device-id
 fi
 
 function ensure_line() {
-    FILE="$1"
-    LINE="$2"
-    if ! grep -q "^$LINE" "$FILE"
-    then echo Adding "$LINE" to "$FILE"
-        LN=$(echo "$LINE" | sed -e 's/[ =].*$//g')
-        (grep -v "$LN" "$FILE";echo "$LINE") > /tmp/$$.out
-        # shellcheck disable=2024
-        sudo tee "$FILE" < /tmp/$$.out >/dev/null
-        rm /tmp/$$.out
-    fi
+  FILE="$1"
+  LINE="$2"
+  if ! grep -q "^$LINE" "$FILE"; then
+    echo Adding "$LINE" to "$FILE"
+    # shellcheck disable=2001
+    LN=$(echo "$LINE" | sed -e 's/[ =].*$//g')
+    (
+      grep -v "$LN" "$FILE"
+      echo "$LINE"
+    ) >/tmp/$$.out
+    # shellcheck disable=2024
+    sudo tee "$FILE" </tmp/$$.out >/dev/null
+    rm /tmp/$$.out
+  fi
 }
-for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"
-do ensure_line "/etc/sysctl.conf" "$SYSCTL"
+for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"; do
+  ensure_line "/etc/sysctl.conf" "$SYSCTL"
 done
 ensure_line /etc/ssh/sshd_config "PermitRootLogin without-password"
 
-for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"
-do ensure_line "/etc/hosts" "$HST"
+for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
+  ensure_line "/etc/hosts" "$HST"
 done
 
-for GRP in video libvirt audio bluetooth sudo
-do if grep -q "$GRP" /etc/group
-then if ! grep -q "$GRP.*$USER" /etc/group
-then echo Adding $USER to $GRP
-  sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
-fi
-fi
+for GRP in video libvirt audio bluetooth sudo; do
+  if grep -q "$GRP" /etc/group; then
+    if ! grep -q "$GRP.*$USER" /etc/group; then
+      echo Adding "$USER" to $GRP
+      sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
+    fi
+  fi
 done
 echo Done
