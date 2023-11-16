@@ -12,6 +12,8 @@ gitbin["lnav"]="tstack/lnav"
 gitbin["cmctl"]="cert-manager/cert-manager"
 gitbin["gron"]="tomnomnom/gron"
 gitbin["lf"]="gokcehan/lf"
+gitbin["pistol"]="doronbehar/pistol"
+gitbin["chroma"]="alecthomas/chroma"
 
 function grab_bin() {
 	BIN="$1"
@@ -37,12 +39,15 @@ function grab_bin() {
 			cd "$BASE/$REPO" || return
 			mkdir $ARCH
 			cd $ARCH || exit
-			if (echo "$DOWN" | grep -qE "bz$"); then
-				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
+			if (echo "$DOWN" | grep -qE "gz$"); then
+        (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+			elif (echo "$DOWN" | grep -qE "bz2$"); then
+        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "zip$"); then
 				(curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
 			else
-				(curl -L "$DOWN" | tar xfz -) 2>/dev/null
+        (curl -L -o "$BIN" "$DOWN") 2>/dev/null
+        chmod +x "$BIN"
 			fi
 			FILES=$(find . -name "$BIN")
 			if [ -n "$FILES" ]; then
