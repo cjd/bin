@@ -1,0 +1,4 @@
+#!/bin/bash
+kubectl create job --from=cronjob/backup-vols-job backup-vols-job-manual
+(kubectl wait --for=condition=complete --timeout=-1s job/backup-vols-job-manual && pkill stern )&
+stern backup-vols-job-manual
