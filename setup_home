@@ -159,11 +159,10 @@ done
 
 if [ "$USER" != "debenham" ]; then
 	ensure_line /etc/ssh/sshd_config "PermitRootLogin without-password"
+  for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
+	  ensure_line "/etc/hosts" "$HST"
+  done
 fi
-
-for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
-	ensure_line "/etc/hosts" "$HST"
-done
 
 for GRP in video libvirt audio bluetooth sudo; do
 	if grep -q "$GRP" /etc/group; then
