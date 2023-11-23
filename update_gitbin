@@ -1,21 +1,24 @@
 #!/bin/bash
 declare -A gitbin
 gitbin["bat"]="sharkdp/bat"
-gitbin["lazygit"]="jesseduffield/lazygit"
-gitbin["stern"]="stern/stern"
-gitbin["k9s"]="derailed/k9s"
 gitbin["btop"]="aristocratos/btop"
+gitbin["cmctl"]="cert-manager/cert-manager"
 gitbin["delta"]="dandavison/delta"
 gitbin["dust"]="bootandy/dust"
+gitbin["fx"]="antonmedv/fx"
 gitbin["fzf"]="junegunn/fzf"
-gitbin["lnav"]="tstack/lnav"
-gitbin["cmctl"]="cert-manager/cert-manager"
 gitbin["gron"]="tomnomnom/gron"
+gitbin["k9s"]="derailed/k9s"
+gitbin["lazygit"]="jesseduffield/lazygit"
 gitbin["lf"]="gokcehan/lf"
-gitbin["pistol"]="doronbehar/pistol"
-gitbin["chroma"]="alecthomas/chroma"
+gitbin["lnav"]="tstack/lnav"
+gitbin["stern"]="stern/stern"
+#gitbin["pistol"]="doronbehar/pistol"
+#gitbin["chroma"]="alecthomas/chroma"
 
 function grab_bin() {
+  SKIPPED=""
+  GRABBED=""
 	BIN="$1"
 	REPO=${gitbin["$BIN"]}
 	mkdir -p "$BASE/$REPO"
@@ -23,17 +26,13 @@ function grab_bin() {
 	curl -s -o release "https://api.github.com/repos/${REPO}/releases/latest"
 	VERSION=$(grep tag_name release | cut -f4 -d\")
 	RELEASED=$(grep published_at release | cut -f4 -d\")
-	RD=$(date -d "$RELEASED" +%s)
-	TD=$(date +%s)
 	echo "$REPO $VERSION - $RELEASED"
-	# check if updated in last 30 days
-	if [ $((TD - RD - (60 * 60 * 24 * 30))) -gt 0 ]; then
-		if [ -z "$2" ]; then
-			echo OLD
-			return
-		fi
-	fi
 	for ARCH in x86_64 amd64 arm64 aarch64; do
+    CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
+    if [ "$CURRENT_VERSION" = "$VERSION" ];then
+      SKIPPED="$SKIPPED $ARCH"
+      continue
+    fi
 		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep $ARCH | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
 		if [ -n "$DOWN" ]; then
 			cd "$BASE/$REPO" || return
@@ -49,9 +48,10 @@ function grab_bin() {
         (curl -L -o "$BIN" "$DOWN") 2>/dev/null
         chmod +x "$BIN"
 			fi
-			FILES=$(find . -name "$BIN")
+			FILES=$(find . -name "$BIN" | head -1 | sed -e 's/^.\///g')
 			if [ -n "$FILES" ]; then
-				echo "$FILES"
+        echo "$VERSION" > "$HOME/Sync/bin/$ARCH/.${BIN}.version"
+				GRABBED="$GRABBED $ARCH"
 				if (echo "$DOWN" | grep -qE "arm64|aarch64"); then
 					ARCH=aarch64
 				else
@@ -61,6 +61,8 @@ function grab_bin() {
 			fi
 		fi
 	done
+  echo "Grabbed: $GRABBED"
+  echo "Skipped: $SKIPPED"
 }
 
 BASE=/tmp/gitbin.$$
@@ -73,5 +75,5 @@ if [ -z "$1" ]; then
 else
 	grab_bin "$1" "$1"
 fi
-#rm -rf $BASE
+rm -rf $BASE
 #chmod +x ~/Sync/bin/*/* 2>/dev/null
