@@ -11,6 +11,7 @@ fi
 if ! command -v sudo &>/dev/null; then
 	echo Installing sudo
 	su root -c "apt install sudo"
+	su root -c "sed --in-place -e 's/^\(sudo.*\):\(.*\)$/\1:$USER,\2/g' /etc/group"
 	echo Sudo installed - you may need to relogin
 	exit
 fi
@@ -67,7 +68,7 @@ if [ "$FORCE" ] || [ ! -d $BASEDIR/Config ]; then
 	if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
 		rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/Config/ $BASEDIR/Config
 	else
-		rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/Config/ $BASEDIR/Config
+		rsync -arvz --delete-after -e 'ssh -p 2222' cjd@home.adebenham.com:/home/cjd/Sync/Config/ $BASEDIR/Config
 	fi
 fi
 
@@ -75,7 +76,7 @@ if [ "$FORCE" ] || [ ! -d $BASEDIR/bin ]; then
 	if ping -c1 -W1 -q jimbob >/dev/null 2>&1; then
 		rsync -arvz --delete-after cjd@jimbob:/home/cjd/Sync/bin/ $BASEDIR/bin
 	else
-		rsync -arvz --delete-after -e 'ssh -p 443' cjd@home.adebenham.com:/home/cjd/Sync/bin/ $BASEDIR/bin
+		rsync -arvz --delete-after -e 'ssh -p 2222' cjd@home.adebenham.com:/home/cjd/Sync/bin/ $BASEDIR/bin
 	fi
 	chmod -R +x $BASEDIR/bin/*
 fi
