@@ -30,7 +30,7 @@ if command -v Xwayland >/dev/null; then
 			PKGS+="$P "
 		fi
 	done
-  INSTALL_CHROME="Y"
+	INSTALL_CHROME="Y"
 fi
 
 if command -v Xorg >/dev/null; then
@@ -39,7 +39,7 @@ if command -v Xorg >/dev/null; then
 			PKGS+="$P "
 		fi
 	done
-  INSTALL_CHROME="Y"
+	INSTALL_CHROME="Y"
 fi
 
 if [ "$INSTALL_CHROME" = "Y" ]; then
@@ -168,22 +168,22 @@ function ensure_line() {
 	fi
 }
 if [ "$USER" != "debenham" ]; then
-  for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"; do
-	  ensure_line "/etc/sysctl.conf" "$SYSCTL"
-  done
+	for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"; do
+		ensure_line "/etc/sysctl.conf" "$SYSCTL"
+	done
 
 	ensure_line /etc/ssh/sshd_config "PermitRootLogin without-password"
-  for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
-	  ensure_line "/etc/hosts" "$HST"
-  done
+	for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
+		ensure_line "/etc/hosts" "$HST"
+	done
 
-  for GRP in video libvirt audio bluetooth sudo; do
-    if grep -q "$GRP" /etc/group; then
-      if ! grep -q "$GRP.*$USER" /etc/group; then
-        echo Adding "$USER" to $GRP
-        sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
-      fi
-    fi
-  done
+	for GRP in video libvirt audio bluetooth sudo; do
+		if grep -q "$GRP" /etc/group; then
+			if ! grep -q "$GRP.*$USER" /etc/group; then
+				echo Adding "$USER" to $GRP
+				sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
+			fi
+		fi
+	done
 fi
 echo Done
