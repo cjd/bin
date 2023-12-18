@@ -3,6 +3,7 @@ DATE=$(date +%Y%m%d)
 BASEDIR=~/Sync
 UNAME=$(uname -m)
 FORCE=""
+INSTALL_CHROME=""
 if [ "$1" = "force" ]; then
 	FORCE="$1"
 fi
@@ -23,12 +24,25 @@ for P in tmux neovim git zsh htop curl ripgrep openssh-server build-essential fu
 	fi
 done
 
-if command -v Xorg >/dev/null; then
-	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring alttab; do
+if command -v Xwayland >/dev/null; then
+	for P in wtype sway foot swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman mako-notifier wofi; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
 	done
+  INSTALL_CHROME="Y"
+fi
+
+if command -v Xorg >/dev/null; then
+	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
+		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
+			PKGS+="$P "
+		fi
+	done
+  INSTALL_CHROME="Y"
+fi
+
+if [ "$INSTALL_CHROME" = "Y" ]; then
 	if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
 		echo Installing chrome
 		wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -153,23 +167,23 @@ function ensure_line() {
 		rm /tmp/$$.out
 	fi
 }
-for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"; do
-	ensure_line "/etc/sysctl.conf" "$SYSCTL"
-done
-
 if [ "$USER" != "debenham" ]; then
+  for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1"; do
+	  ensure_line "/etc/sysctl.conf" "$SYSCTL"
+  done
+
 	ensure_line /etc/ssh/sshd_config "PermitRootLogin without-password"
   for HST in "192.168.0.2  jimbob" "192.168.0.4  elite" "192.168.0.8  fanless" "192.168.0.9  piserve" "10.8.0.5  tinkerboard" "10.8.0.6  website"; do
 	  ensure_line "/etc/hosts" "$HST"
   done
-fi
 
-for GRP in video libvirt audio bluetooth sudo; do
-	if grep -q "$GRP" /etc/group; then
-		if ! grep -q "$GRP.*$USER" /etc/group; then
-			echo Adding "$USER" to $GRP
-			sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
-		fi
-	fi
-done
+  for GRP in video libvirt audio bluetooth sudo; do
+    if grep -q "$GRP" /etc/group; then
+      if ! grep -q "$GRP.*$USER" /etc/group; then
+        echo Adding "$USER" to $GRP
+        sudo sed --in-place -e "s/^\($GRP.*\):\(.*\)$/\1:$USER,\2/g" /etc/group
+      fi
+    fi
+  done
+fi
 echo Done
