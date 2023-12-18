@@ -13,6 +13,7 @@ gitbin["lazygit"]="jesseduffield/lazygit"
 gitbin["lf"]="gokcehan/lf"
 gitbin["lnav"]="tstack/lnav"
 gitbin["stern"]="stern/stern"
+gitbin["trip"]="fujiapple852/trippy"
 #gitbin["pistol"]="doronbehar/pistol"
 #gitbin["chroma"]="alecthomas/chroma"
 
@@ -33,7 +34,7 @@ function grab_bin() {
       SKIPPED="$SKIPPED $ARCH"
       continue
     fi
-		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep $ARCH | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
+		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep $ARCH | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
 		if [ -n "$DOWN" ]; then
 			cd "$BASE/$REPO" || return
 			mkdir $ARCH
@@ -42,13 +43,15 @@ function grab_bin() {
         (curl -L "$DOWN" | tar xfz -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "bz2$"); then
         (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+			elif (echo "$DOWN" | grep -qE "tbz$"); then
+        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "zip$"); then
 				(curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
 			else
         (curl -L -o "$BIN" "$DOWN") 2>/dev/null
         chmod +x "$BIN"
 			fi
-			FILES=$(find . -name "$BIN" | head -1 | sed -e 's/^.\///g')
+			FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
 			if [ -n "$FILES" ]; then
         echo "$VERSION" > "$HOME/Sync/bin/$ARCH/.${BIN}.version"
 				GRABBED="$GRABBED $ARCH"
