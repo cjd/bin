@@ -33,3 +33,6 @@ youtube-dl
 yt-dlp
 comictagger
 appimage/sunshine
+amd64
+arm64
+appimage/losslesscut
