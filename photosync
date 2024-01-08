@@ -1,2 +1,60 @@
-#!/bin/sh
-rclone -v sync /export/Pictures/Various/2021/2021-10-Various gphotos:/upload
+#!/usr/bin/bash
+PICDIR=/tank/Pictures/Various
+SYNCDIR=/home/cjd/Sync/Pictures-for-gphoto
+
+sync_file()
+{
+  SOURCE="$1"
+  IMGNAME=""
+  DIRNAME="${SYNCDIR}/$(basename "$(dirname "$SOURCE")")"
+  case "$(file -Lb --mime-type -- "$SOURCE")" in
+    video/*)
+      IMGNAME=$(basename "$SOURCE")
+      ;;
+    image/*)
+      IMGNAME="${DIRNAME}/$(basename "$SOURCE")"
+      # shellcheck disable=2001
+      TARGET="$(echo "${IMGNAME}" | sed -e 's/\.[^.]*$//g').jpg"
+      if [ ! -s "${TARGET}" ] || [ "${SOURCE}" -nt "${TARGET}" ]; then
+        echo Converting "$IMGNAME"
+        if [ ! -d "$DIRNAME" ];then mkdir "$DIRNAME";fi
+        convert "${SOURCE}" -quality 85 -resize 2048x2048 "${TARGET}"
+        exiv2 -ea- "${SOURCE}" | exiv2 -ia- "${TARGET}"
+        touch -r "${SOURCE}" "${TARGET}"
+      fi
+      ;;
+  esac
+}
+
+# Main code follows
+cd $PICDIR || exit
+DIR="."
+if [ -n "$1" ]; then
+  P=${PICDIR//\//\\\/}
+  # shellcheck disable=2001
+  DIR=".$(echo "$1" | sed -e "s/$P//g")"
+fi
+
+find "$DIR" -type d | while read -r SOURCEDIR; do
+  echo Syncing "$SOURCEDIR"
+  DESTDIR="${SYNCDIR}/$(basename "$SOURCEDIR")"
+  find "$SOURCEDIR" -type f -maxdepth 1 | while read -r SOURCE; do
+    echo -n .
+    sync_file "$SOURCE"
+  done
+  echo
+  pushd "$SOURCEDIR" >/dev/null || exit
+  find . -type f -maxdepth 1 | sed -e 's/\.[^.]*$//g' | sort > /tmp/sync_src
+  popd >/dev/null || exit
+  pushd "$DESTDIR" >/dev/null || continue
+  find . -type f -maxdepth 1 | sed -e 's/\.[^.]*$//g' | sort > /tmp/sync_dst
+  popd >/dev/null || exit
+  diff /tmp/sync_src /tmp/sync_dst | grep "^>" | sed -e 's/^> //g' | while read -r EXTRA; do
+    echo rm "${DESTDIR}/${EXTRA}.jpg"
+    rm "${DESTDIR}/${EXTRA}.jpg"
+  done
+  ALBUM=$(basename "$DESTDIR")
+  if [ "$ALBUM" != "." ]; then
+    rclone sync -v "${DESTDIR}" "gphotos:album/${ALBUM}"
+  fi
+done
