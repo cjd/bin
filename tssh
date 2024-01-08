@@ -7,4 +7,4 @@ chosen=$( (grep "Host " ~/.ssh/config | tr ' ' '\n' | grep "^[a-z]" | sort) | $C
 #kitty --hold zsh -ci "TERM=tmux-256color ssh $chosen"
 export SSH_AUTH_SOCK=$(ls /run/user/*/ssh-agent.socket /tmp/ssh-*/agent.* 2>/dev/null | head -1)
 export SK_SIGNING_PLUGIN=gnubbyagent
-$T --hold ssh "$chosen"
+$T ssh "$chosen"
