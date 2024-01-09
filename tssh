@@ -2,9 +2,13 @@
 PATH=~/Sync/bin/x86_64/:$PATH
 cd ~/Sync/OBS/memes || exit
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then CMD=wofi; DM="--dmenu"; T="foot";else CMD=rofi; DM="-dmenu";T="kitty";fi
-chosen=$( (grep "Host " ~/.ssh/config | tr ' ' '\n' | grep "^[a-z]" | sort) | $CMD $DM -i -no-custom)
+chosen=$( (echo localhost; grep "Host " ~/.ssh/config | tr ' ' '\n' | grep "^[a-z]" | sort) | $CMD $DM -i -no-custom)
 [ -z "$chosen" ] && exit
 #kitty --hold zsh -ci "TERM=tmux-256color ssh $chosen"
-export SSH_AUTH_SOCK=$(ls /run/user/*/ssh-agent.socket /tmp/ssh-*/agent.* 2>/dev/null | head -1)
-export SK_SIGNING_PLUGIN=gnubbyagent
-$T ssh "$chosen"
+if [ "$chosen" == "localhost" ]; then
+  foot
+else
+  export SSH_AUTH_SOCK=$(ls /run/user/*/ssh-agent.socket /tmp/ssh-*/agent.* 2>/dev/null | head -1)
+  export SK_SIGNING_PLUGIN=gnubbyagent
+  $T ssh "$chosen"
+fi
