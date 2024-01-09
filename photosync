@@ -18,7 +18,7 @@ sync_file()
       if [ ! -s "${TARGET}" ] || [ "${SOURCE}" -nt "${TARGET}" ]; then
         echo Converting "$IMGNAME"
         if [ ! -d "$DIRNAME" ];then mkdir "$DIRNAME";fi
-        convert "${SOURCE}" -quality 85 -resize 2048x2048 "${TARGET}"
+        convert "${SOURCE}[0]" -quality 85 -resize 2048x2048 "${TARGET}"
         exiv2 -ea- "${SOURCE}" | exiv2 -ia- "${TARGET}"
         touch -r "${SOURCE}" "${TARGET}"
       fi
@@ -54,6 +54,7 @@ find "$DIR" -type d | while read -r SOURCEDIR; do
     rm "${DESTDIR}/${EXTRA}.jpg"
   done
   ALBUM=$(basename "$DESTDIR")
+  find "${DESTDIR}" -size 0 -exec rm "{}" \;
   if [ "$ALBUM" != "." ]; then
     rclone sync -v "${DESTDIR}" "gphotos:album/${ALBUM}"
   fi
