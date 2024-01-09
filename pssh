@@ -1,26 +1,38 @@
 #!/bin/bash
 if [ -n "$1" ]
   then END="0"
+  FIRST=""
   # shellcheck disable=2001
   CMD=$(echo "$@"|sed -e 's/^.* -- //g')
   if [ -z "$TMUX" ]
     then tmux new-session -d "ssh -t $1 '$CMD'; echo Press enter to exit; read"
-    else tmux split-window -v "ssh -t $1 '$CMD'; echo Press enter to exit; read"
+    else FIRST=$1
+    #else tmux split-window -v "ssh -t $1 '$CMD'; echo Press enter to exit; read"
   fi
-  s=$(tmux display-message -p '#S')
-  tmux set -t "$s" -g pane-border-format "###P #T"
-  tmux set -t "$s" -g pane-border-status
+  s=$(tmux display-message -p '#{session_name}')
+  tmux set -t "$s" pane-border-format "###{pane_index} #{pane_title}"
+  tmux set -t "$s" pane-border-status top
   shift
   for i in "$@"; do
 	if [ "$END" == "0" ]; 
       then if [ "$i" == "--" ]
         then END="1"
-        else tmux split-window -v -t "$s" "ssh -t $i '$CMD'; echo Press enter to exit; read"
-	    tmux select-layout even-vertical
+        else tmux split-window -v -t "$s" "printf '\033]2;%s\033\\' '$i';ssh -t $i '$CMD'; echo Press enter to exit; read"
       fi
     fi
   done
   tmux select-pane -t 0
-  tmux set -s -t "$s" synchronize-panes
-  tmux attach -t "$s"
+  tmux set -s -t "$s" synchronize-panes on
+	tmux select-layout -t "$s" even-vertical
+  if [ -z "$FIRST" ]; then
+    tmux attach -t "$s"
+  else
+    # shellcheck disable=1003
+    printf '\033]2;%s\033\\' "$FIRST";
+    ssh -t "${FIRST}" "$CMD"
+    echo "Press enter to exit"
+    read -r
+  fi
 fi
+tmux set -s -t "$s" synchronize-panes off
+tmux set -t "$s" pane-border-status off
