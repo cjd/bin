@@ -9,9 +9,18 @@ sync_file()
   DIRNAME="${SYNCDIR}/$(basename "$(dirname "$SOURCE")")"
   case "$(file -Lb --mime-type -- "$SOURCE")" in
     video/*)
-      IMGNAME=$(basename "$SOURCE")
+      echo -n v
+      IMGNAME="${DIRNAME}/$(basename "$SOURCE")"
+      # shellcheck disable=2001
+      TARGET="$(echo "${IMGNAME}" | sed -e 's/\.[^.]*$//g').mp4"
+      if [ ! -s "${TARGET}" ] || [ "${SOURCE}" -nt "${TARGET}" ]; then
+        echo Converting "$IMGNAME"
+        ffmpeg -i "${SOURCE}" -vf scale=-4:720 -map 0:0 -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
+        touch -r "${SOURCE}" "${TARGET}"
+      fi
       ;;
     image/*)
+      echo -n i
       IMGNAME="${DIRNAME}/$(basename "$SOURCE")"
       # shellcheck disable=2001
       TARGET="$(echo "${IMGNAME}" | sed -e 's/\.[^.]*$//g').jpg"
@@ -22,6 +31,9 @@ sync_file()
         exiv2 -ea- "${SOURCE}" | exiv2 -ia- "${TARGET}"
         touch -r "${SOURCE}" "${TARGET}"
       fi
+      ;;
+    *)
+      echo -n .
       ;;
   esac
 }
@@ -35,11 +47,10 @@ if [ -n "$1" ]; then
   DIR=".$(echo "$1" | sed -e "s/$P//g")"
 fi
 
-find "$DIR" -type d | while read -r SOURCEDIR; do
+find "$DIR" -type d | sort | while read -r SOURCEDIR; do
   echo Syncing "$SOURCEDIR"
   DESTDIR="${SYNCDIR}/$(basename "$SOURCEDIR")"
   find "$SOURCEDIR" -type f -maxdepth 1 | while read -r SOURCE; do
-    echo -n .
     sync_file "$SOURCE"
   done
   echo
