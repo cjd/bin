@@ -61,8 +61,8 @@ find "$DIR" -type d | sort | while read -r SOURCEDIR; do
   find . -type f -maxdepth 1 | sed -e 's/\.[^.]*$//g' | sort > /tmp/sync_dst
   popd >/dev/null || exit
   diff /tmp/sync_src /tmp/sync_dst | grep "^>" | sed -e 's/^> //g' | while read -r EXTRA; do
-    echo rm "${DESTDIR}/${EXTRA}.jpg"
-    rm "${DESTDIR}/${EXTRA}.jpg"
+    echo rm "${DESTDIR}/${EXTRA}.*"
+    rm "${DESTDIR}/${EXTRA}."*
   done
   ALBUM=$(basename "$DESTDIR")
   find "${DESTDIR}" -size 0 -exec rm "{}" \;
