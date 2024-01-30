@@ -15,8 +15,9 @@ sync_file()
       TARGET="$(echo "${IMGNAME}" | sed -e 's/\.[^.]*$//g').mp4"
       if [ ! -s "${TARGET}" ] || [ "${SOURCE}" -nt "${TARGET}" ]; then
         echo Converting "$IMGNAME"
-        ffmpeg -i "${SOURCE}" -vf scale=-4:720 -map 0:0 -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
-        touch -r "${SOURCE}" "${TARGET}"
+        #ffmpeg -v error -i "${SOURCE}" -vf scale=-4:720 -map 0:0 -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
+        ffmpeg -v error -i "${SOURCE}" -vf scale=-4:720 -dn -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
+        touch -c -r "${SOURCE}" "${TARGET}"
       fi
       ;;
     image/*)
