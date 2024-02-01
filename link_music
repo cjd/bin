@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+TARGET=$(echo $1 | sed -e 's/^\/tank\/Music\///' -e 's/\// - /')
+ln -s "$1" "$TARGET"
