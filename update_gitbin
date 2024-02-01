@@ -18,6 +18,11 @@ gitbin["paclear"]="orangekame3/paclear"
 #gitbin["pistol"]="doronbehar/pistol"
 #gitbin["chroma"]="alecthomas/chroma"
 
+NC='\033[0m' # No Color
+RED='\033[1;31m'
+BLUE='\033[1;34m'
+GRAY='\033[0;37m'
+
 function grab_bin() {
   SKIPPED=""
   GRABBED=""
@@ -28,7 +33,7 @@ function grab_bin() {
 	curl -s -o release "https://api.github.com/repos/${REPO}/releases/latest"
 	VERSION=$(grep tag_name release | cut -f4 -d\")
 	RELEASED=$(grep published_at release | cut -f4 -d\")
-	echo "$REPO $VERSION - $RELEASED"
+	echo -e "${BLUE}$REPO${NC} $VERSION - $RELEASED"
 	for ARCH in x86_64 amd64 arm64 aarch64; do
     CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
     if [ "$CURRENT_VERSION" = "$VERSION" ];then
@@ -65,8 +70,8 @@ function grab_bin() {
 			fi
 		fi
 	done
-  echo "Grabbed: $GRABBED"
-  echo "Skipped: $SKIPPED"
+  echo -e "Grabbed:${RED}$GRABBED${NC}"
+  echo -e "Skipped:${GRAY}$SKIPPED${NC}"
 }
 
 BASE=/tmp/gitbin.$$
