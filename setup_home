@@ -56,7 +56,9 @@ fi
 if [ "$PKGS" ]; then
 	echo Installing "$PKGS"
 	# shellcheck disable=2086
-	sudo apt install $PKGS
+  for PKG in $PKGS; do
+  	sudo apt -y install $PKG
+  done
 fi
 
 echo Ensuring Sync directory exists
