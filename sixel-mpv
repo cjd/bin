@@ -1,1 +1,1 @@
-mpv -vo sixel --quiet $@
+mpv -vo sixel --quiet "$@"
