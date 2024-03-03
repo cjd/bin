@@ -7,7 +7,7 @@ if [ "$1" != "skip" ]; then
 fi
 SQLITE="sqlite3 /config/database.sqlite"
 rm /tmp/fix_comic.sh 2>/dev/null
-$KE $SQLITE "select series_id,url,title from series_metadata, series where series.id=series_metadata.series_id;" | while read -r SERIES; do
+$KE $SQLITE "select series_id,url,title from series_metadata, series where series.id=series_metadata.series_id;" | grep Weekly | while read -r SERIES; do
 	echo $SERIES
 	SERIES_ID=$(echo "$SERIES" | cut -f1 -d"|")
 	NAME=$(echo "$SERIES" | cut -f2 -d"|" | sed -e 's/^.*202/202/g' -e 's/%20/ /g' -e 's/\/$//g')
