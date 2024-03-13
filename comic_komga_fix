@@ -3,7 +3,7 @@
 KE="kubectl exec -itq pod/komga-0 -n default -c komga -- "
 if [ "$1" != "skip" ]; then
 	$KE apt update
-	$KE apt install sqlite3
+	$KE apt install -y sqlite3
 fi
 SQLITE="sqlite3 /config/database.sqlite"
 rm /tmp/fix_comic.sh 2>/dev/null
