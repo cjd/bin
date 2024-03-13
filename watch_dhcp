@@ -1,0 +1,2 @@
+#!/bin/bash
+stern dnsmasq -A |grep -i dhcp
