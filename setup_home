@@ -189,4 +189,23 @@ if [ "$USER" != "debenham" ]; then
 		fi
 	done
 fi
+
+if [ -e /etc/wireguard ]; then
+  sudo chmod a+rX /etc/wireguard
+  if [ -e /etc/wireguard/wg0.conf ]; then
+    echo Setting up wireguard
+    cd $BASEDIR/Config/systemd || exit
+    for L in *wire*; do
+      if [ ! -L /etc/systemd/system/"$L" ]; then
+        echo creating /etc/systemd/system/"$L"
+        sudo mv /etc/systemd/system/"$L" "/etc/systemd/system/$L-$DATE" 2>/dev/null
+        sudo ln -s $BASEDIR/Config/systemd/"$L" /etc/systemd/system/
+      fi
+    done
+    sudo systemctl daemon-reload
+    sudo systemctl enable wireguard_reresolve-dns.timer
+    sudo systemctl start wireguard_reresolve-dns.timer
+  fi
+fi
+
 echo Done
