@@ -15,7 +15,7 @@ gitbin["lnav"]="tstack/lnav"
 gitbin["stern"]="stern/stern"
 gitbin["trip"]="fujiapple852/trippy"
 gitbin["paclear"]="orangekame3/paclear"
-#gitbin["pistol"]="doronbehar/pistol"
+#gitbin["eza"]="eza-community/eza"
 #gitbin["chroma"]="alecthomas/chroma"
 
 NC='\033[0m' # No Color
