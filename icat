@@ -1,2 +1,2 @@
-#!/bin/sh
-kitty +kitten icat "$@"
+#!/bin/bash
+chafa -f sixel "$@"
