@@ -19,7 +19,7 @@ fi
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in tmux neovim git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude kitty-terminfo foot-terminfo fd-find grc chafa; do
+for P in tmux neovim git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude kitty-terminfo foot-terminfo fd-find grc chafa libfuse2; do
 	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
 		PKGS+="$P "
 	fi
@@ -32,6 +32,20 @@ if command -v Xwayland >/dev/null; then
 		fi
 	done
 	INSTALL_CHROME="Y"
+fi
+
+if [ "$PKGS" ]; then
+	echo Installing "$PKGS"
+  # Filtering out non-installable packages
+  PKGS="$(echo "$PKGS" | tr ' ' '\n' | sort )"
+  AVAIL="$(apt-cache --generate pkgnames \
+    | grep --line-regexp --fixed-strings \
+    -e $(echo $PKGS | sed -e 's/ / -e /g') | sort )"
+  echo Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g')
+	echo Actually Installing "$AVAIL"
+  if [ "$PKGS" ]; then
+    sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
+  fi
 fi
 
 if command -v Xorg >/dev/null; then
@@ -51,14 +65,6 @@ if [ "$INSTALL_CHROME" = "Y" ]; then
 		rm ./google-chrome-stable_current_amd64.deb
 		sudo apt-get -f install
 	fi
-fi
-
-if [ "$PKGS" ]; then
-	echo Installing "$PKGS"
-	# shellcheck disable=2086
-  for PKG in $PKGS; do
-  	sudo apt -y install $PKG
-  done
 fi
 
 echo Ensuring Sync directory exists
