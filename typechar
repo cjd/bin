@@ -1,6 +1,8 @@
 #!/bin/bash
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-	wtype "$1"
+	#wtype "$1"
+  echo -n "$1" | wl-copy
+  wtype -M ctrl V -m ctrl
 else
 	xdotool key "$1"
 fi
