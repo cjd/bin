@@ -1,22 +1,21 @@
 #!/bin/bash
 declare -A gitbin
-gitbin["bat"]="sharkdp/bat"
-gitbin["btop"]="aristocratos/btop"
-gitbin["cmctl"]="cert-manager/cert-manager"
-gitbin["delta"]="dandavison/delta"
-#gitbin["dust"]="bootandy/dust"
-gitbin["fx"]="antonmedv/fx"
-gitbin["fzf"]="junegunn/fzf"
-gitbin["gron"]="tomnomnom/gron"
-gitbin["k9s"]="derailed/k9s"
-gitbin["lazygit"]="jesseduffield/lazygit"
-gitbin["lf"]="gokcehan/lf"
-gitbin["lnav"]="tstack/lnav"
-gitbin["stern"]="stern/stern"
-gitbin["trip"]="fujiapple852/trippy"
-gitbin["paclear"]="orangekame3/paclear"
-#gitbin["eza"]="eza-community/eza"
-#gitbin["chroma"]="alecthomas/chroma"
+gitbin["bat"]="sharkdp/bat"                   # better cat
+gitbin["btop"]="aristocratos/btop"            # better top
+gitbin["cmctl"]="cert-manager/cert-manager"   # for k8s certs
+gitbin["delta"]="dandavison/delta"            # better diff
+gitbin["fx"]="antonmedv/fx"                   # json viewer
+gitbin["fzf"]="junegunn/fzf"                  # fuzzy find
+gitbin["gron"]="tomnomnom/gron"               # grepable json
+gitbin["k9s"]="derailed/k9s"                  # k8s tui
+gitbin["lazygit"]="jesseduffield/lazygit"     # git tui
+gitbin["lf"]="gokcehan/lf"                    # file manager
+gitbin["lnav"]="tstack/lnav"                  # log navigation
+gitbin["stern"]="stern/stern"                 # k8s log viewer
+gitbin["trip"]="fujiapple852/trippy"          # better traceroute
+gitbin["paclear"]="orangekame3/paclear"       # Pacman clear
+gitbin["carapace"]="carapace-sh/carapace-bin" # zsh cli completion
+gitbin["jnv"]="ynqa/jnv"                      # Json viewer/filter
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
@@ -47,6 +46,8 @@ function grab_bin() {
 			cd $ARCH || exit
 			if (echo "$DOWN" | grep -qE "gz$"); then
         (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+			elif (echo "$DOWN" | grep -qE "xz$"); then
+        (curl -L "$DOWN" | tar xfJ -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "bz2$"); then
         (curl -L "$DOWN" | tar xfj -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "tbz$"); then
