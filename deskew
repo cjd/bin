@@ -1,0 +1,31 @@
+#!/usr/bin/bash
+ORIGDIR=`pwd`
+WORKDIR=$(mktemp -d -t pdf_deskew-XXX)
+OUTIMGS=""
+cd "$WORKDIR" || exit
+for INPUT in "$@"; do
+  case "$INPUT" in
+    *.pdf|*.PDF)
+      pdfimages -all "$ORIGDIR/$INPUT" "images-$INPUT"
+      ;;
+    *)
+      cp "$ORIGDIR/$INPUT" "images-$INPUT"
+      ;;
+  esac
+
+  # 2490x3510 == A4 page at 300dpi
+  #for IMG in "images-${INPUT}"*
+  for IMG in images-${INPUT}*
+    do echo Converting "$IMG"
+      convert "$IMG" -background black -set option:deskew:auto-crop true -deskew 40% -bordercolor black -border 50x50 -fuzz 50% -trim +repage -resize 2490x3510 ${IMG}-out.jpg
+      OUTIMGS+=" ${IMG}-out.jpg"
+  done
+done
+convert $OUTIMGS -density 300 -units pixelsperinch "$ORIGDIR/$1-deskew.pdf"
+echo "$WORKDIR"
+rm -rf "$WORKDIR"
+read -p "Upload to paperless (y/n)? " INPUT
+if [ "$INPUT" = "y" ]; then
+  kubectl cp "$ORIGDIR/$1-deskew.pdf" paperles-0:/usr/src/paperless/consume -c paperless
+  echo Uploaded "$ORIGDIR/$1-deskew.pdf"
+fi
