@@ -1,2 +1,6 @@
 #!/bin/sh
-xdotool search --name "Meet – .* Chrome" windowactivate --sync key ctrl+d windowactivate $(xdotool getactivewindow)
+SINK=$(wpctl status|grep "Virtual sink" |grep vol|sed -e 's/^.* \([0-9]*\)\. .*/\1/')
+wpctl set-mute "$SINK" toggle
+#obs-cli toggle-mute Mic/Aux
+obs-cli scene-item toggle Camera "Mute Overlay"
+pkill -SIGRTMIN+10 i3blocks
