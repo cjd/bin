@@ -18,6 +18,7 @@ if [[ ${chosen::1} == "🎥" ]]; then
 	if [[ ${chosen:2:4} == "Text" ]]; then
 		TEXT=$(echo "" | $CMD $DM -p "Enter Text for OBS" -theme-str 'listview { enabled: false;}')
 		if [ "$TEXT" ]; then
+      rm ~/Sync/OBS/memes/quickshow.gif
       convert -size 1280x720 pattern:gray50 -auto-level +level-colors red,blue -pointsize 240 -font 'Google-Sans-Bold' \
         -gravity center -fill black -stroke black -strokewidth 5 -annotate +10+10 "$TEXT" \
          -gravity center -define gradient:vector=0,20,0,140 -fill 'gradient:green-blue' -stroke black -strokewidth 5 -annotate +0+0 "$TEXT" \
