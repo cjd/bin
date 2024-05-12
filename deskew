@@ -26,6 +26,6 @@ echo "$WORKDIR"
 rm -rf "$WORKDIR"
 read -p "Upload to paperless (y/n)? " INPUT
 if [ "$INPUT" = "y" ]; then
-  kubectl cp "$ORIGDIR/$1-deskew.pdf" paperles-0:/usr/src/paperless/consume -c paperless
+  kubectl cp "$ORIGDIR/$1-deskew.pdf" paperless-0:/usr/src/paperless/consume -c paperless
   echo Uploaded "$ORIGDIR/$1-deskew.pdf"
 fi
