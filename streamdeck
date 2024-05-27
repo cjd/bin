@@ -1,0 +1,3 @@
+#!/bin/sh
+PATH=$HOME/Sync/bin:$PATH
+~/.python/streamdeck-linux-gui/bin/streamdeck
