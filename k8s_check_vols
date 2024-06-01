@@ -1,0 +1,15 @@
+#!/bin/bash
+for POD in $(kubectl get pod --no-headers|cut -f1 -d" ")
+do NODE=$(kubectl describe pod "$POD"|grep Node:|sed -e 's/^.* \(.*\)\/.*$/\1/' 2>/dev/null)
+  for DIR in $(kubectl describe pod "$POD" |grep Path|grep k8s/|sed -e 's/^.* \(\/k8.*$\)/\1/')
+  do if [ "$(cat $DIR/.nodeName)" != "$NODE" ]
+    then echo -n "Pod $POD is running on $NODE mounting $DIR but vol thinks it is on $(cat $DIR/.nodeName) Fix?"
+      read -r FIX
+      if [ "$FIX" = "y" ]; then
+        echo -n "$NODE" > $DIR/.nodeName
+      fi
+    else echo "Pod $POD is running on $NODE mounting $DIR"
+    fi
+  done
+done
+
