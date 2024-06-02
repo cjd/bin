@@ -34,6 +34,15 @@ if command -v Xwayland >/dev/null; then
 	INSTALL_CHROME="Y"
 fi
 
+if command -v Xorg >/dev/null; then
+	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
+		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
+			PKGS+="$P "
+		fi
+	done
+	INSTALL_CHROME="Y"
+fi
+
 if [ "$PKGS" ]; then
 	echo Installing "$PKGS"
   # Filtering out non-installable packages
@@ -46,15 +55,6 @@ if [ "$PKGS" ]; then
   if [ "$PKGS" ]; then
     sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
   fi
-fi
-
-if command -v Xorg >/dev/null; then
-	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
-		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
-			PKGS+="$P "
-		fi
-	done
-	INSTALL_CHROME="Y"
 fi
 
 if [ "$INSTALL_CHROME" = "Y" ]; then
