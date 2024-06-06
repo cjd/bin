@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH=~/Sync/bin/$(uname -m):~/Sync/bin:~/Sync/bin/appimage:~/go/bin:~/.local/bin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 xmodmap -e 'keycode 135 = Super_R' && xset -r 135
 if [ "$XDG_SESSION_TYPE" = "wayland" ];then
   HP=$(wlr-randr|grep DP|grep HP |cut -f1 -d" ")
@@ -9,6 +10,8 @@ if [ "$XDG_SESSION_TYPE" = "wayland" ];then
   fi
 #  wlr-randr --output eDP-1 --off --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
   wlr-randr --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
+  pkill waycorner
+  waycorner &
 else
   xrandr --auto
   sleep 2
