@@ -39,8 +39,8 @@ function grab_bin() {
       SKIPPED="$SKIPPED $ARCH"
       continue
     fi
-    if [ "$ARCH" = "x86_64" ]; then SA="[x86_64|amd64]";fi
-    if [ "$ARCH" = "aarch64" ]; then SA="[x86_64|amd64]";fi
+    if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64";fi
+    if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64";fi
 		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
 		if [ -n "$DOWN" ]; then
 			cd "$BASE/$REPO" || return
