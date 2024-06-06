@@ -19,7 +19,7 @@ fi
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in tmux neovim git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude kitty-terminfo foot-terminfo fd-find grc chafa libfuse2 libfuse2t64; do
+for P in tmux vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude foot-terminfo fd-find grc chafa libfuse2 libfuse2t64; do
 	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
 		PKGS+="$P "
 	fi
@@ -35,7 +35,7 @@ if command -v Xwayland >/dev/null; then
 fi
 
 if command -v Xorg >/dev/null; then
-	for P in yad xsettingsd udiskie dex xautolock i3 i3blocks kitty rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
+	for P in xsettingsd udiskie dex xautolock i3 i3blocks rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
