@@ -1,0 +1,8 @@
+#!/bin/bash
+# MAKELINKS
+shopt -s nocaseglob
+SCRIPTDIR=$HOME/Sync/appimage
+NAME=$(basename $0)
+BIN=$(ls -c ${SCRIPTDIR}/${NAME}*|head -1)
+chmod +x "$BIN"
+$BIN "$@"
