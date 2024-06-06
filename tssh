@@ -1,13 +1,15 @@
 #!/bin/bash
-PATH=~/Sync/bin/x86_64/:$PATH
+source ~/.profile
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then CMD=wofi; DM="--dmenu"; T="foot";else CMD=rofi; DM="-dmenu";T="kitty";fi
+#T="$HOME/Sync/bin/appimage/wezterm"
+T="wezterm"
 chosen=$( (echo localhost; grep "Host " ~/.ssh/config | tr ' ' '\n' | grep "^[a-z]" | sort) | $CMD $DM -i -no-custom)
 [ -z "$chosen" ] && exit
-#kitty --hold zsh -ci "TERM=tmux-256color ssh $chosen"
 if [ "$chosen" == "localhost" ]; then
-  foot
+  $T
 else
-  export SSH_AUTH_SOCK=$(ls /run/user/*/ssh-agent.socket /tmp/ssh-*/agent.* 2>/dev/null | head -1)
+  SSH_AUTH_SOCK=$(ls /run/user/*/ssh-agent.socket /tmp/ssh-*/agent.* 2>/dev/null | head -1)
+  export SSH_AUTH_SOCK
   export SK_SIGNING_PLUGIN=gnubbyagent
-  $T ssh "$chosen"
+  $T -e ssh "$chosen"
 fi
