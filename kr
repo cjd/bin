@@ -10,15 +10,17 @@ if [ -z "$2" ]
 fi
 
 if [ -z "$NS" ]
-  then K=`kubectl get $TYPE -A | grep -v "^c3" | grep $NAME | head -n1`
-  else K="$NS `kubectl get $TYPE -n $NS | grep $NAME | head -n1`"
+then K=$(kubectl get "$TYPE" -A | grep -v "^c3" | grep "$NAME" | head -n1)
+else K="$NS $(kubectl get "$TYPE" -n "$NS" | grep "$NAME" | head -n1)"
 fi
 
-NS=`echo $K | sed -e 's/^\([^ ]*\) .*$/\1/g'`
-POD=`echo $K | sed -e 's/^[^ ]* *\([^ ]*\) *.*$/\1/g'`
-echo restarting $TYPE ${POD} in ${NS} namespace
+# shellcheck disable=SC2001
+NS=$(echo "$K" | sed -e 's/^\([^ ]*\) .*$/\1/g')
+# shellcheck disable=SC2001
+POD=$(echo "$K" | sed -e 's/^[^ ]* *\([^ ]*\) *.*$/\1/g')
+echo "Restarting $TYPE ${POD} in ${NS} namespace"
 read -p "Run kubectl rollout restart $TYPE $POD -n $NS ? " -n 1 -r
 echo
 if [ "$REPLY" = "y" ]
-  then kubectl rollout restart $TYPE $POD -n $NS
+  then kubectl rollout restart "$TYPE" "$POD" -n "$NS"
 fi
