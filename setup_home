@@ -52,7 +52,7 @@ if [ "$PKGS" ]; then
     -e $(echo $PKGS | sed -e 's/ / -e /g') | sort )"
   echo Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g')
 	echo Actually Installing "$AVAIL"
-  if [ "$PKGS" ]; then
+  if [ "$AVAIL" ]; then
     sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
   fi
 fi
