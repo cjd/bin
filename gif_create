@@ -1,2 +1,2 @@
 #!/bin/sh
-ffmpeg -i "$1" -f yuv4mpegpipe - | ./gifski -o "$2" -
+ffmpeg -i "$1" -f yuv4mpegpipe "$@" - | gifski -o "$(echo "$1"|sed -e 's/\..*$/\.gif/').gif" -
