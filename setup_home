@@ -26,7 +26,7 @@ for P in tmux vim-tiny git zsh htop curl ripgrep openssh-server build-essential 
 done
 
 if command -v Xwayland >/dev/null; then
-	for P in wtype sway foot swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi; do
+	for P in wtype sway foot swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
@@ -35,7 +35,7 @@ if command -v Xwayland >/dev/null; then
 fi
 
 if command -v Xorg >/dev/null; then
-	for P in xsettingsd udiskie dex xautolock i3 i3blocks rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring; do
+	for P in xsettingsd udiskie dex xautolock i3 i3blocks rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring yad; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
