@@ -16,6 +16,8 @@ gitbin["trip"]="fujiapple852/trippy"          # better traceroute
 gitbin["paclear"]="orangekame3/paclear"       # Pacman clear
 gitbin["carapace"]="carapace-sh/carapace-bin" # zsh cli completion
 gitbin["jnv"]="ynqa/jnv"                      # Json viewer/filter
+gitbin["xlights"]="xLightsSequencer/xLights"  # Xlights Appimage
+gitbin["wezterm"]="wez/wezterm"               # Wezterm Appimage
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
@@ -23,8 +25,8 @@ BLUE='\033[1;34m'
 GRAY='\033[0;37m'
 
 function grab_bin() {
-  SKIPPED=""
-  GRABBED=""
+	SKIPPED=""
+	GRABBED=""
 	BIN="$1"
 	REPO=${gitbin["$BIN"]}
 	mkdir -p "$BASE/$REPO"
@@ -34,42 +36,42 @@ function grab_bin() {
 	RELEASED=$(grep published_at release | cut -f4 -d\")
 	echo -e "${BLUE}$REPO${NC} $VERSION - $RELEASED"
 	for ARCH in x86_64 aarch64; do
-    CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
-    if [ "$CURRENT_VERSION" = "$VERSION" ];then
-      SKIPPED="$SKIPPED $ARCH"
-      continue
-    fi
-    if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64";fi
-    if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64";fi
-		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i linux | grep -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
+		CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
+		if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+			SKIPPED="$SKIPPED $ARCH"
+			continue
+		fi
+		if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64"; fi
+		if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
+		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
 		if [ -n "$DOWN" ]; then
 			cd "$BASE/$REPO" || return
 			mkdir $ARCH
 			cd $ARCH || exit
 			if (echo "$DOWN" | grep -qE "gz$"); then
-        (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+				(curl -L "$DOWN" | tar xfz -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "xz$"); then
-        (curl -L "$DOWN" | tar xfJ -) 2>/dev/null
+				(curl -L "$DOWN" | tar xfJ -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "bz2$"); then
-        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "tbz$"); then
-        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
 			elif (echo "$DOWN" | grep -qE "zip$"); then
 				(curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
 			else
-        (curl -L -o "$BIN" "$DOWN") 2>/dev/null
-        chmod +x "$BIN"
+				(curl -L -o "$BIN" "$DOWN") 2>/dev/null
+				chmod +x "$BIN"
 			fi
 			FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
 			if [ -n "$FILES" ]; then
-        echo "$VERSION" > "$HOME/Sync/bin/$ARCH/.${BIN}.version"
+				echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
 				GRABBED="$GRABBED $ARCH"
 				mv "$FILES" ~/Sync/bin/$ARCH/
 			fi
 		fi
 	done
-  echo -e "Grabbed:${RED}$GRABBED${NC}"
-  echo -e "Skipped:${GRAY}$SKIPPED${NC}"
+	echo -e "Grabbed:${RED}$GRABBED${NC}"
+	echo -e "Skipped:${GRAY}$SKIPPED${NC}"
 }
 
 BASE=/tmp/gitbin.$$
