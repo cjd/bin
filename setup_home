@@ -19,14 +19,14 @@ fi
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in tmux vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude foot-terminfo fd-find grc chafa libfuse2 libfuse2t64; do
+for P in tmux vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude fd-find grc chafa libfuse2 libfuse2t64; do
 	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
 		PKGS+="$P "
 	fi
 done
 
 if command -v Xwayland >/dev/null; then
-	for P in wtype sway foot swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
+	for P in wtype sway swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
 		if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
 			PKGS+="$P "
 		fi
