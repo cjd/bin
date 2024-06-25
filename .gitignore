@@ -36,3 +36,11 @@ appimage/sunshine
 amd64
 arm64
 appimage/losslesscut
+appimage/.freeshow.version
+appimage/.greenlight.version
+appimage/.nextcloud.version
+appimage/.wezterm.version
+appimage/.xlights.version
+appimage/freeshow
+appimage/wezterm
+appimage/wezterm
