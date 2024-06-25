@@ -18,6 +18,9 @@ gitbin["carapace"]="carapace-sh/carapace-bin" # zsh cli completion
 gitbin["jnv"]="ynqa/jnv"                      # Json viewer/filter
 gitbin["xlights"]="xLightsSequencer/xLights"  # Xlights Appimage
 gitbin["wezterm"]="wez/wezterm"               # Wezterm Appimage
+gitbin["greenlight"]="unknownskl/greenlight"  # Greenlight Appimage
+gitbin["freeshow"]="ChurchApps/FreeShow"      # Freeshow Appimage
+gitbin["nextcloud"]="nextcloud-releases/desktop" # Nextcloud Appimage
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
@@ -35,15 +38,16 @@ function grab_bin() {
 	VERSION=$(grep tag_name release | cut -f4 -d\")
 	RELEASED=$(grep published_at release | cut -f4 -d\")
 	echo -e "${BLUE}$REPO${NC} $VERSION - $RELEASED"
-	for ARCH in x86_64 aarch64; do
+	for ARCH in appimage x86_64 aarch64; do
 		CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
 		if [ "$CURRENT_VERSION" = "$VERSION" ]; then
 			SKIPPED="$SKIPPED $ARCH"
 			continue
 		fi
+		if [ "$ARCH" = "appimage" ]; then SA="appimage"; fi
 		if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64"; fi
 		if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
-		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | head -1)
+		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | head -1)
 		if [ -n "$DOWN" ]; then
 			cd "$BASE/$REPO" || return
 			mkdir $ARCH
@@ -67,6 +71,10 @@ function grab_bin() {
 				echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
 				GRABBED="$GRABBED $ARCH"
 				mv "$FILES" ~/Sync/bin/$ARCH/
+        if [ "$ARCH" = "appimage" ]; then
+				  echo "$VERSION" >"$HOME/Sync/bin/x86_64/.${BIN}.version"
+          break;
+        fi
 			fi
 		fi
 	done
