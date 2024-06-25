@@ -4,13 +4,13 @@ declare -A results
 dirs["Volumes"]=""
 dirs["Backups"]=""
 dirs["Music"]=""
-dirs["Pictures"]="--exclude 'thumbnail' --exclude '.thumbcache' --exclude 'thumbnails-digikam.db' --exclude 'thumbnails-digikam.db-journal' --exclude '.dtrash'"
+dirs["Pictures"]="--exclude thumbnail --exclude .thumbcache --exclude thumbnails-digikam.db --exclude thumbnails-digikam.db-journal --exclude .dtrash"
 dirs["Comics"]=""
 dirs["Television"]=""
 dirs["Movies"]=""
 dirs["Roms"]=""
 dirs["Virtual"]=""
-dirs["Stuff"]="--exclude '.ignore' --exclude '.cache' --exclude .local --exclude .config --exclude '.old' --exclude '.mozilla'"
+dirs["Stuff"]="--exclude Home/.ignore --exclude Home/.cache --exclude Home/.local --exclude Home/.config --exclude Home/.old --exclude Home/.mozilla"
 dirs["pv"]=""
 
 # shellcheck disable=2154
@@ -19,11 +19,9 @@ for MNT in /media/*/*; do
 	read -r CHECK
 	if [ "$CHECK" != "n" ]; then
     for DIR in "${!dirs[@]}"; do
-    #for DIR in Volumes Backups Music Pictures Comics Television Movies Roms Virtual Stuff pv; do
+      if [ -n "$1" ] && [ "$1" != "$DIR" ]; then continue;fi
       echo "Updating $DIR with options ${dirs[$DIR]}"
       ionice -c 3 sudo rsync -av --delete-during ${dirs[$DIR]} "/tank/${DIR}/" "${MNT}/${DIR}/"
-      #ionice -c 3 sudo rsync -av --delete-during --exclude 'thumbnail' --exclude '.thumbcache' --exclude 'thumbnails-digikam.db' --exclude 'thumbnails-digikam.db-journal' --exclude '.dtrash' --exclude '.ignore' /tank/${DIR}/ "${MNT}"/${DIR}/
-			#declare RES_${DIR}="$?"
       results[$DIR]="$?"
     done
 
