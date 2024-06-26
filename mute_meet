@@ -2,6 +2,18 @@
 #SINK=$(wpctl status|grep "Virtual sink" |grep vol|sed -e 's/^.* \([0-9]*\)\. .*/\1/')
 SINK=$(wpctl status|grep "Snowball" |grep vol|sed -e 's/^.* \([0-9]*\)\. .*/\1/')
 wpctl set-mute "$SINK" toggle
-#obs-cli toggle-mute Mic/Aux
-~/Sync/bin/obs-cli scene-item toggle Camera "Mute Overlay"
+# shellcheck disable=2143
+if [ -n "$(wpctl status|grep "Snowball" |grep MUTED)" ];
+then echo "󰍭 MIC MUTED"
+  echo "󰍭 MIC MUTED"
+  echo "#FF0000"
+  curl "http://192.168.0.91/select/page_select/set?option=mute_on"
+  curl "http://192.168.0.91/text/top_text/set?value=Mute"
+else echo "󰍬 MIC LIVE"
+  echo "󰍬 MIC LIVE"
+  echo "#00FF00"
+  curl "http://192.168.0.91/select/page_select/set?option=mute_off"
+  curl "http://192.168.0.91/text/top_text/set?value=Live"
+fi
+#~/Sync/bin/obs-cli scene-item toggle Camera "Mute Overlay"
 pkill -SIGRTMIN+10 i3blocks
