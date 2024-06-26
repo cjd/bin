@@ -21,6 +21,7 @@ gitbin["wezterm"]="wez/wezterm"               # Wezterm Appimage
 gitbin["greenlight"]="unknownskl/greenlight"  # Greenlight Appimage
 gitbin["freeshow"]="ChurchApps/FreeShow"      # Freeshow Appimage
 gitbin["nextcloud"]="nextcloud-releases/desktop" # Nextcloud Appimage
+gitbin["shellcheck"]="koalaman/shellcheck"    # Shell checker
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
