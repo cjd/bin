@@ -31,69 +31,69 @@ BLUE='\033[1;34m'
 GRAY='\033[0;37m'
 
 function grab_bin() {
-	SKIPPED=""
-	GRABBED=""
-	BIN="$1"
-	REPO=${gitbin["$BIN"]}
-	mkdir -p "$BASE/$REPO"
-	cd "$BASE/$REPO" || return
-	curl -s -o release "https://api.github.com/repos/${REPO}/releases/latest"
-	VERSION=$(grep tag_name release | cut -f4 -d\")
-	RELEASED=$(grep published_at release | cut -f4 -d\")
-	echo -e "${BLUE}$REPO${NC} $VERSION - $RELEASED"
-	for ARCH in appimage x86_64 aarch64; do
-		CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
-		if [ "$CURRENT_VERSION" = "$VERSION" ]; then
-			SKIPPED="$SKIPPED $ARCH"
-			continue
-		fi
-		if [ "$ARCH" = "appimage" ]; then SA="appimage"; fi
-		if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64"; fi
-		if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
-		DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | head -1)
-		if [ -n "$DOWN" ]; then
-			cd "$BASE/$REPO" || return
-			mkdir $ARCH
-			cd $ARCH || exit
-			if (echo "$DOWN" | grep -qE "gz$"); then
-				(curl -L "$DOWN" | tar xfz -) 2>/dev/null
-			elif (echo "$DOWN" | grep -qE "xz$"); then
-				(curl -L "$DOWN" | tar xfJ -) 2>/dev/null
-			elif (echo "$DOWN" | grep -qE "bz2$"); then
-				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
-			elif (echo "$DOWN" | grep -qE "tbz$"); then
-				(curl -L "$DOWN" | tar xfj -) 2>/dev/null
-			elif (echo "$DOWN" | grep -qE "zip$"); then
-				(curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
-			else
-				(curl -L -o "$BIN" "$DOWN") 2>/dev/null
-				chmod +x "$BIN"
-			fi
-			FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
-			if [ -n "$FILES" ]; then
-				echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
-				GRABBED="$GRABBED $ARCH"
-				mv "$FILES" ~/Sync/bin/$ARCH/
+  SKIPPED=""
+  GRABBED=""
+  BIN="$1"
+  REPO=${gitbin["$BIN"]}
+  mkdir -p "$BASE/$REPO"
+  cd "$BASE/$REPO" || return
+  curl -s -o release "https://api.github.com/repos/${REPO}/releases/latest"
+  VERSION=$(grep tag_name release | cut -f4 -d\")
+  RELEASED=$(grep published_at release | cut -f4 -d\")
+  echo -e "${BLUE}$REPO${NC} $VERSION - $RELEASED"
+  for ARCH in appimage x86_64 aarch64; do
+    CURRENT_VERSION=$(cat "$HOME/Sync/bin/$ARCH/.${BIN}.version" 2>/dev/null)
+    if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+      SKIPPED="$SKIPPED $ARCH"
+      continue
+    fi
+    if [ "$ARCH" = "appimage" ]; then SA="appimage"; fi
+    if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64"; fi
+    if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
+    DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | head -1)
+    if [ -n "$DOWN" ]; then
+      cd "$BASE/$REPO" || return
+      mkdir $ARCH
+      cd $ARCH || exit
+      if (echo "$DOWN" | grep -qE "gz$"); then
+        (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+      elif (echo "$DOWN" | grep -qE "xz$"); then
+        (curl -L "$DOWN" | tar xfJ -) 2>/dev/null
+      elif (echo "$DOWN" | grep -qE "bz2$"); then
+        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+      elif (echo "$DOWN" | grep -qE "tbz$"); then
+        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+      elif (echo "$DOWN" | grep -qE "zip$"); then
+        (curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
+      else
+        (curl -L -o "$BIN" "$DOWN") 2>/dev/null
+        chmod +x "$BIN"
+      fi
+      FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
+      if [ -n "$FILES" ]; then
+        echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
+        GRABBED="$GRABBED $ARCH"
+        mv "$FILES" ~/Sync/bin/$ARCH/
         if [ "$ARCH" = "appimage" ]; then
-				  echo "$VERSION" >"$HOME/Sync/bin/x86_64/.${BIN}.version"
-          break;
+          echo "$VERSION" >"$HOME/Sync/bin/x86_64/.${BIN}.version"
+          break
         fi
-			fi
-		fi
-	done
-	echo -e "Grabbed:${RED}$GRABBED${NC}"
-	echo -e "Skipped:${GRAY}$SKIPPED${NC}"
+      fi
+    fi
+  done
+  echo -e "Grabbed:${RED}$GRABBED${NC}"
+  echo -e "Skipped:${GRAY}$SKIPPED${NC}"
 }
 
 BASE=/tmp/gitbin.$$
 mkdir $BASE
 cd $BASE || exit
 if [ -z "$1" ]; then
-	for BIN in "${!gitbin[@]}"; do
-		grab_bin "$BIN" ""
-	done
+  for BIN in "${!gitbin[@]}"; do
+    grab_bin "$BIN" ""
+  done
 else
-	grab_bin "$1" "$1"
+  grab_bin "$1" "$1"
 fi
 rm -rf $BASE
 #chmod +x ~/Sync/bin/*/* 2>/dev/null
