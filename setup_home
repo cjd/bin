@@ -176,9 +176,12 @@ function ensure_line() {
 		rm /tmp/$$.out
 	fi
 }
+
+ensure_line "/etc/sysctl.d/99-debenham.conf" "kernel.dmesg_restrict=0"
+
 if [ "$USER" != "debenham" ]; then
-	for SYSCTL in "kernel.dmesg_restrict=0" "net.ipv4.conf.all.src_valid_mark=1" "fs.inotify.max_user_watches=10485760"; do
-		ensure_line "/etc/sysctl.conf" "$SYSCTL"
+	for SYSCTL in "net.ipv4.conf.all.src_valid_mark=1" "fs.inotify.max_user_watches=10485760"; do
+		ensure_line "/etc/sysctl.d/99-debenham.conf" "$SYSCTL"
 	done
 
 	ensure_line /etc/ssh/sshd_config "PermitRootLogin without-password"
