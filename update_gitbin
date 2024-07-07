@@ -24,6 +24,8 @@ gitbin["nextcloud"]="nextcloud-releases/desktop" # Nextcloud Appimage
 gitbin["shellcheck"]="koalaman/shellcheck"       # Shell checker
 gitbin["vivid"]="sharkdp/vivid"                  # LS_COLORS generator
 #gitbin["usql"]="xo/usql"                         # Universal SQL Client
+gitbin["bluetuith"]="darkhz/bluetuith"           # Bluetooth TUI
+gitbin["mqttui"]="EDJoPaTo/mqttui"               # MQTT TUI
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
