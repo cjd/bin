@@ -11,6 +11,7 @@ if [ "$XDG_SESSION_TYPE" = "wayland" ];then
 #  wlr-randr --output eDP-1 --off --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
   wlr-randr --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
   pkill waycorner
+  pkill wl-mirror
   waycorner &
 else
   xrandr --auto
