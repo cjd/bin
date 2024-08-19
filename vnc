@@ -1,0 +1,4 @@
+#!/bin/bash
+ssh -n "$1" "WAYLAND_DISPLAY=wayland-1 wayvnc 0.0.0.0" &
+sleep 2
+vncviewer "$1" && ssh "$1" "pkill wayvnc"
