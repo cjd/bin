@@ -26,6 +26,9 @@ gitbin["vivid"]="sharkdp/vivid"                  # LS_COLORS generator
 #gitbin["usql"]="xo/usql"                         # Universal SQL Client
 gitbin["bluetuith"]="darkhz/bluetuith"           # Bluetooth TUI
 gitbin["mqttui"]="EDJoPaTo/mqttui"               # MQTT TUI
+gitbin["kubediff"]="Ramilito/kubediff"           # Kube Diff
+gitbin["yq"]="mikefarah/yq"                      # Yq parser
+gitbin["rclone"]="rclone/rclone"                 # Rclone
 
 NC='\033[0m' # No Color
 RED='\033[1;31m'
