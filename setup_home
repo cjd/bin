@@ -19,7 +19,7 @@ fi
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in tmux vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude fd-find grc chafa libfuse2 libfuse2t64; do
+for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude fd-find grc libfuse2 libfuse2t64; do
 	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
 		PKGS+="$P "
 	fi
@@ -180,7 +180,7 @@ function ensure_line() {
 ensure_line "/etc/sysctl.d/99-debenham.conf" "kernel.dmesg_restrict=0"
 
 if [ "$USER" != "debenham" ]; then
-	for SYSCTL in "net.ipv4.conf.all.src_valid_mark=1" "fs.inotify.max_user_watches=10485760"; do
+	for SYSCTL in "net.ipv4.conf.all.src_valid_mark=1" "fs.inotify.max_user_watches=20485760" "fs.inotify.max_user_instances=20485760" "fs.inotify.max_queued_events=20485760"; do
 		ensure_line "/etc/sysctl.d/99-debenham.conf" "$SYSCTL"
 	done
 
