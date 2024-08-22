@@ -1,15 +1,22 @@
 #!/bin/bash
 if [ -n "$1" ]
-  then END="0"
+  then if [ "$1" = "new" ]
+    then shift
+    # shellcheck disable=2068
+    TMUX="" && wezterm start -- pssh $@
+    exit
+  fi
+  END="0"
   FIRST=""
   # shellcheck disable=2001
   CMD=$(echo "$@"|sed -e 's/^.* -- //g')
   if [ -z "$TMUX" ]
-    then tmux new-session -d "ssh -t $1 '$CMD'; echo Press enter to exit; read"
+    then tmux new-session -s 'pssh' -d "ssh -t $1 '$CMD'; echo Press enter to exit; read"
+      s='pssh'
     else FIRST=$1
+    s=$(tmux display-message -p '#{session_name}')
     #else tmux split-window -v "ssh -t $1 '$CMD'; echo Press enter to exit; read"
   fi
-  s=$(tmux display-message -p '#{session_name}')
   tmux set -t "$s" pane-border-format "###{pane_index} #{pane_title}"
   tmux set -t "$s" pane-border-status top
   shift
