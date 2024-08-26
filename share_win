@@ -10,19 +10,16 @@ else
 		if [ "$WINX" -le "$POS" ]; then
 			REGION=$WIN
 		fi
-	done < <(swaymsg -t get_tree | jq -r '.. | (.nodes? // empty)[] | select(.pid and .visible) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | sort)
+	done < <(swaymsg -t get_tree | jq -r '.. | (.nodes? // empty)[] | select(.pid and .visible) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | sort -n )
 fi
+OFFSETX=$(swaymsg -t get_outputs|jq '.[] | select(.rect.width>0) | .rect.width' |sed -e 'N;s/\n/+/' | bc -l)
 if ! (swaymsg -t get_outputs | grep HEAD); then
 	swaymsg create_output
 fi
 RES=$(echo "$REGION" | awk '{print $2}')
-HP=$(swaymsg -t get_outputs |jq '.[] | select(.serial=="6CM9481CF4") | .name')
-ACER=$(swaymsg -t get_outputs |jq '.[] | select(.serial=="TD1SA0023900") | .name ')
 HEADLESS=$(swaymsg -t get_outputs|jq '.[]| .name' | grep HEAD)
-swaymsg "output $HP position 0 0"
-swaymsg "output $ACER position 2560 0"
-swaymsg "output $HEADLESS resolution $RES position 4480 0"
-(wl-mirror -r "$REGION"; swaymsg output $HEADLESS unplug) &
+swaymsg "output $HEADLESS resolution $RES position $OFFSETX 0"
+(wl-mirror -r "$REGION"; swaymsg output "$HEADLESS" unplug) &
 while ! ( swaymsg -t get_tree | grep -q 'Wayland Output');do sleep 1;done
-swaymsg "[title=\"Wayland Output\"]" move to output $HEADLESS
+swaymsg "[title=\"Wayland Output\"]" move to output "$HEADLESS"
 swaymsg "[title=\"Wayland Output\"]" fullscreen
