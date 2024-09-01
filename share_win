@@ -19,7 +19,7 @@ fi
 RES=$(echo "$REGION" | awk '{print $2}')
 HEADLESS=$(swaymsg -t get_outputs|jq '.[]| .name' | grep HEAD)
 swaymsg "output $HEADLESS resolution $RES position $OFFSETX 0"
-(wl-mirror -r "$REGION"; swaymsg output "$HEADLESS" unplug) &
+(wl-mirror -r "$REGION"; swaymsg "output $HEADLESS unplug") &
 while ! ( swaymsg -t get_tree | grep -q 'Wayland Output');do sleep 1;done
-swaymsg "[title=\"Wayland Output\"]" move to output "$HEADLESS"
+swaymsg "[title=\"Wayland Output\"]" "move to output $HEADLESS"
 swaymsg "[title=\"Wayland Output\"]" fullscreen
