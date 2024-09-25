@@ -12,4 +12,4 @@ do DATA=$(echo "$ROW" | base64 --decode)
   ln -s "$SRC" "${SYNC_DIR}/${DIR}/${SONG}.mp3" 2>/dev/null
 done
 
-rsync -rLvP --delete-after --size-only --exclude '.stfolder' ~/Sync/Music-For-Car-Links/ ~/Sync/Music-For-Car/
+rsync -rLvP --delete-after --size-only --exclude '.stfolder' ~/Sync/Music-For-Car-Links/ ~/Sync/Car_Music/
