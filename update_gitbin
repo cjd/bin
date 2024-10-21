@@ -59,36 +59,37 @@ function grab_bin() {
     if [ "$ARCH" = "appimage" ]; then SA="appimage"; fi
     if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64\|appimage"; fi
     if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
-    DOWN=$(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | head -1)
-    if [ -n "$DOWN" ]; then
-      cd "$BASE/$REPO" || return
-      mkdir $ARCH
-      cd $ARCH || exit
-      if (echo "$DOWN" | grep -qE "gz$"); then
-        (curl -L "$DOWN" | tar xfz -) 2>/dev/null
-      elif (echo "$DOWN" | grep -qE "xz$"); then
-        (curl -L "$DOWN" | tar xfJ -) 2>/dev/null
-      elif (echo "$DOWN" | grep -qE "bz2$"); then
-        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
-      elif (echo "$DOWN" | grep -qE "tbz$"); then
-        (curl -L "$DOWN" | tar xfj -) 2>/dev/null
-      elif (echo "$DOWN" | grep -qE "zip$"); then
-        (curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
-      else
-        (curl -L -o "$BIN" "$DOWN") 2>/dev/null
-        chmod +x "$BIN"
-      fi
-      FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
-      if [ -n "$FILES" ]; then
-        echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
-        GRABBED="$GRABBED $ARCH"
-        mv "$FILES" ~/Sync/bin/$ARCH/
-        if [ "$ARCH" = "appimage" ]; then
-          echo "$VERSION" >"$HOME/Sync/bin/x86_64/.${BIN}.version"
-          break
+    for DOWN in $(grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk|sha256" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort )
+      do if [ -n "$DOWN" ]; then
+        cd "$BASE/$REPO" || return
+        mkdir $ARCH
+        cd $ARCH || exit
+        if (echo "$DOWN" | grep -qE "gz$"); then
+          (curl -L "$DOWN" | tar xfz -) 2>/dev/null
+        elif (echo "$DOWN" | grep -qE "xz$"); then
+          (curl -L "$DOWN" | tar xfJ -) 2>/dev/null
+        elif (echo "$DOWN" | grep -qE "bz2$"); then
+          (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+        elif (echo "$DOWN" | grep -qE "tbz$"); then
+          (curl -L "$DOWN" | tar xfj -) 2>/dev/null
+        elif (echo "$DOWN" | grep -qE "zip$"); then
+          (curl -L "$DOWN" >a.zip && unzip -q a.zip) 2>/dev/null
+        else
+          (curl -L -o "$BIN" "$DOWN") 2>/dev/null
+          chmod +x "$BIN"
+        fi
+        FILES=$(find . -type f -name "$BIN" | head -1 | sed -e 's/^.\///g')
+        if [ -n "$FILES" ]; then
+          echo "$VERSION" >"$HOME/Sync/bin/$ARCH/.${BIN}.version"
+          GRABBED="$GRABBED $ARCH"
+          mv "$FILES" ~/Sync/bin/$ARCH/
+          if [ "$ARCH" = "appimage" ]; then
+            echo "$VERSION" >"$HOME/Sync/bin/x86_64/.${BIN}.version"
+            break
+          fi
         fi
       fi
-    fi
+    done
   done
   echo -e "Grabbed:${RED}$GRABBED${NC}"
   echo -e "Skipped:${GRAY}$SKIPPED${NC}"
