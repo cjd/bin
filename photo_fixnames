@@ -3,5 +3,7 @@ shopt -s nocaseglob
 exiv2 -r "%Y-%m-%d-%H%M%S-:basename:" mv ./*jpg
 for M in *.mp4
 do FN=$(ffprobe -v error -show_entries stream_tags=creation_time "$M" |grep TAG|head -1 | sed -e 's/^.*=\(.*\)T\([0-9]*\):\([0-9]*\):\([0-9]*\)\..*$/\1-\2\3\4/g')
-  mv -i -n "$M" "${FN}-${M}"
+  if [ -n "${FN}" ];
+    then mv -i -n "$M" "${FN}-${M}"
+  fi
 done
