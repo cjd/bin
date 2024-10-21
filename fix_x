@@ -2,14 +2,19 @@
 export PATH=~/Sync/bin/$(uname -m):~/Sync/bin:~/Sync/bin/appimage:~/go/bin:~/.local/bin:/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin
 xmodmap -e 'keycode 135 = Super_R' && xset -r 135
 if [ "$XDG_SESSION_TYPE" = "wayland" ];then
-  HP=$(wlr-randr|grep DP|grep HP |cut -f1 -d" ")
-  ACER=$(wlr-randr|grep DP|grep Acer |cut -f1 -d" ")
+  if [ -n "$1" ]; then
+    LEFTDISP=$(wlr-randr | grep "$1" | cut -f1 -d" ")
+    RIGHTDISP=$(wlr-randr | grep "$2" | cut -f1 -d" ")
+  else
+    LEFTDISP=$(wlr-randr|grep DP|grep HP |cut -f1 -d" ")
+    RIGHTDISP=$(wlr-randr|grep DP|grep Acer |cut -f1 -d" ")
+  fi
   if [ "$1" = "safe" ]; then
     wlr-randr --output eDP-1 --on
     exit
   fi
-#  wlr-randr --output eDP-1 --off --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
-  wlr-randr --output "$HP" --pos 0,0 --output "$ACER" --pos 2560,0
+#  wlr-randr --output eDP-1 --off --output "$LEFTDISP" --pos 0,0 --output "$RIGHTDISP" --pos 2560,0
+  wlr-randr --output "$LEFTDISP" --pos 0,0 --output "$RIGHTDISP" --pos 2560,0
   pkill waycorner
   pkill wl-mirror
   waycorner &
