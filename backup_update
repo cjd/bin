@@ -1,17 +1,19 @@
 #!/bin/bash
 declare -A dirs
 declare -A results
-dirs["Volumes"]="--exclude immich/thumbs --exclude immich/encoded-video"
 dirs["Backups"]=""
+dirs["Books"]=""
+dirs["Comics"]=""
+dirs["Home"]=""
+dirs["Movies"]=""
 dirs["Music"]=""
 dirs["Pictures"]="--exclude thumbnail --exclude .thumbcache --exclude thumbnails-digikam.db --exclude thumbnails-digikam.db-journal --exclude .dtrash"
-dirs["Comics"]=""
-dirs["Television"]=""
-dirs["Movies"]=""
-dirs["Roms"]=""
-dirs["Virtual"]=""
-dirs["Stuff"]="--exclude Home/.ignore --exclude Home/.cache --exclude Home/.local --exclude Home/.config --exclude Home/.old --exclude Home/.mozilla"
 dirs["pv"]=""
+dirs["Roms"]=""
+dirs["Stuff"]="--exclude Home/.ignore --exclude Home/.cache --exclude Home/.mozilla"
+dirs["Television"]=""
+dirs["Virtual"]=""
+dirs["Volumes"]="--exclude immich/thumbs --exclude immich/encoded-video"
 
 # shellcheck disable=2154
 for MNT in /media/*/*; do
@@ -20,7 +22,7 @@ for MNT in /media/*/*; do
 	if [ "$CHECK" != "n" ]; then
     for DIR in "${!dirs[@]}"; do
       if [ -n "$1" ] && [ "$1" != "$DIR" ]; then continue;fi
-      echo "Updating $DIR with options ${dirs[$DIR]}"
+      echo "Updating $DIR with options: ${dirs[$DIR]}"
       ionice -c 3 sudo rsync -av --delete-during ${dirs[$DIR]} "/tank/${DIR}/" "${MNT}/${DIR}/"
       results[$DIR]="$?"
     done
