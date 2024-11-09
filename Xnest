@@ -1,0 +1,5 @@
+#!/bin/sh
+Xephyr :1 -ac -resizeable &
+sleep 5
+export DISPLAY=:1.0
+icewm &
