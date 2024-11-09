@@ -9,6 +9,49 @@ if [ "$1" = "force" ]; then
 	FORCE="$1"
 fi
 
+function pkg_installed() {
+  P="$1"
+  if [ -e /usr/bin/dpkg ]; then
+    if ! dpkg-query -s "$P" 2>/dev/null | grep -q ' install ok'; then
+      return 1
+    else return 0
+    fi
+  fi
+  if [ -e /usr/bin/pacman ]; then
+    if pacman -Q "$P" 2>/dev/null >/dev/null; then
+      return 0
+    else return 1
+    fi
+  fi
+}
+
+function install_pkgs() {
+  PKGS="$1"
+  if [ "$PKGS" ]; then
+	  echo Installing "$PKGS"
+    # Filtering out non-installable packages
+    if [ -e /usr/bin/dpkg ]; then
+      PKGS="$(echo "$PKGS" | tr ' ' '\n' | sort )"
+      AVAIL="$(apt-cache --generate pkgnames \
+        | grep --line-regexp --fixed-strings \
+        -e $(echo $PKGS | sed -e 's/ / -e /g') | sort )"
+      echo "Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g' | tr '\n' ' ')"
+      if [ "$AVAIL" ]; then
+	      echo Actually Installing "$AVAIL"
+        sudo apt -y install "$(echo "$AVAIL" | tr '\n' ' ')"
+      fi
+    fi
+    if [ -e /usr/bin/pacman ]; then
+      AVAIL=$(pacman -Si $PKGS | grep "^Name" | sed -e 's/^.* : //g' | tr '\n' ' ')
+      echo "Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g' | tr '\n' ' ')"
+      if [ "$AVAIL" ]; then
+	      echo Actually Installing "$AVAIL"
+        sudo pacman -S --noconfirm $(echo "$AVAIL" | tr '\n' ' ')
+      fi
+    fi
+  fi
+}
+
 if ! command -v sudo &>/dev/null; then
 	echo Installing sudo
 	su root -c "apt install sudo"
@@ -23,7 +66,7 @@ if [ -n "$(find "/var/lib/apt/lists" -maxdepth 0 -type d -empty 2>/dev/null)" ];
 echo Ensuring base packages installed
 PKGS=""
 for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude fd-find grc libfuse2 libfuse2t64 wget libevent-core-2.1-7; do
-	if ! dpkg-query -s $P 2>/dev/null | grep -q ' install ok'; then
+	if ! pkg_installed $P; then
 		PKGS+="$P "
 	fi
 done
@@ -31,7 +74,7 @@ done
 if [ "$USER" != "abc" ]; then
   if command -v Xwayland >/dev/null; then
 	  for P in wtype sway swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
-		  if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
+	    if ! pkg_installed $P; then
 			  PKGS+="$P "
 		  fi
 	  done
@@ -40,7 +83,7 @@ if [ "$USER" != "abc" ]; then
 
   if command -v Xorg >/dev/null; then
 	  for P in xsettingsd udiskie dex xautolock i3 i3blocks rofi suckless-tools x11-xserver-utils x11vnc gnome-keyring yad; do
-		  if ! dpkg-query -s "$P" 2>/dev/null | grep -q 'install ok'; then
+	    if ! pkg_installed $P; then
 			  PKGS+="$P "
 		  fi
 	  done
@@ -48,19 +91,7 @@ if [ "$USER" != "abc" ]; then
   fi
 fi
 
-if [ "$PKGS" ]; then
-	echo Installing "$PKGS"
-  # Filtering out non-installable packages
-  PKGS="$(echo "$PKGS" | tr ' ' '\n' | sort )"
-  AVAIL="$(apt-cache --generate pkgnames \
-    | grep --line-regexp --fixed-strings \
-    -e $(echo $PKGS | sed -e 's/ / -e /g') | sort )"
-  echo Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g')
-	echo Actually Installing "$AVAIL"
-  if [ "$AVAIL" ]; then
-    sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
-  fi
-fi
+install_pkgs "$PKGS"
 
 if [ "$INSTALL_CHROME" = "Y" ]; then
 	if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
@@ -127,14 +158,14 @@ find ~ -maxdepth 1 -xtype l -exec rm "{}" \;
 find ~/.config -maxdepth 1 -xtype l -exec rm "{}" \;
 find ~/.local/share -maxdepth 1 -xtype l -exec rm "{}" \;
 
-echo Updating alternatives
-for L in ex vi view vim vimdiff; do
-	if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
-		echo Update Alternatives
-		sudo update-alternatives --install /usr/bin/$L $L "$HOME/Sync/bin/$UNAME/nvim" 110
-		sudo update-alternatives --set $L "$HOME/Sync/bin/$UNAME/nvim"
-	fi
-done
+#echo Updating alternatives
+#for L in ex vi view vim vimdiff; do
+#	if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
+#		echo Update Alternatives
+#		sudo update-alternatives --install /usr/bin/$L $L "$HOME/Sync/bin/$UNAME/nvim" 110
+#		sudo update-alternatives --set $L "$HOME/Sync/bin/$UNAME/nvim"
+#	fi
+#done
 
 # Clean links
 rm ~/.*-"${DATE}" ~/.config/*-"${DATE}" ~/.local/share/*-"${DATE}" 2>/dev/null
