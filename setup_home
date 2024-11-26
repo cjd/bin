@@ -38,10 +38,11 @@ function install_pkgs() {
       echo "Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g' | tr '\n' ' ')"
       if [ "$AVAIL" ]; then
 	      echo Actually Installing "$AVAIL"
-        sudo apt -y install "$(echo "$AVAIL" | tr '\n' ' ')"
+        sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
       fi
     fi
     if [ -e /usr/bin/pacman ]; then
+      sudo pacman -Sy
       AVAIL=$(pacman -Si $PKGS | grep "^Name" | sed -e 's/^.* : //g' | tr '\n' ' ' 2>/dev/null)
       echo "Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g' | tr '\n' ' ')"
       if [ "$AVAIL" ]; then
@@ -65,7 +66,7 @@ if [ -n "$(find "/var/lib/apt/lists" -maxdepth 0 -type d -empty 2>/dev/null)" ];
 # Ensure base packages installed
 echo Ensuring base packages installed
 PKGS=""
-for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude grc libfuse2 libfuse2t64 wget libevent-core-2.1-7; do
+for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3 luarocks rsync aptitude grc libfuse2 libfuse2t64 wget libevent-core-2.1-7 fuse2; do
 	if ! pkg_installed $P; then
 		PKGS+="$P "
 	fi
