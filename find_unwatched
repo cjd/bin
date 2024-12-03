@@ -1,0 +1,12 @@
+#!/bin/bash
+SYNC_DIR=~/Sync/Unwatched/Television
+rm -rf "${SYNC_DIR}"
+curl -X 'GET' -H 'accept: application/json' -H "Authorization: Mediabrowser Token=\"$JELLYFIN_TOKEN\"" 'https://media.adebenham.com/Users/a518e04f58724d04a36c2e599ce625e2/Items?SortBy=SeriesSortName%2CSortName&SortOrder=Ascending&IncludeItemTypes=Episode&Recursive=true&Fields=PrimaryImageAspectRatio%2CMediaSourceCount&IsMissing=false&ImageTypeLimit=1&EnableImages=false&StartIndex=0&ParentId=767bffe4f11c93ef34b805451a696a4e&Filters=IsUnPlayed&EnableImages=false&Fields=Path' > /tmp/unwatched.json
+for ROW in $( jq -r '.Items[].Path | @base64' < /tmp/unwatched.json )
+do DATA=$(echo "$ROW" | base64 --decode)
+  FILE="$(echo "$DATA" | sed -e 's/^.*Television\///g')"
+  DIR="$(dirname "$FILE")"
+  echo "$FILE"
+  mkdir -p "${SYNC_DIR}/${DIR}" 2>/dev/null
+  ln -s "/media/cjd/bigdisk/Television/$FILE" "${SYNC_DIR}/${DIR}" 2>/dev/null
+done

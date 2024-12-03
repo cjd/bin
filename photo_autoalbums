@@ -1,2 +1,2 @@
- docker run -e API_URL="https://photos.adebenham.com/api/" -e API_KEY="l37BHIYwuph44l7PZ8y3KIniqoyF8wZPvfjTwZJus" -e ROOT_PATH="/pictures/Various" -e ALBUM_LEVELS=-1 salvoxia/immich-folder-album-creator:latest /script/immich_auto_album.sh
+ docker run -e API_URL="https://photos.adebenham.com/api/" -e API_KEY="$IMMICH_KEY" -e ROOT_PATH="/pictures/Various" -e ALBUM_LEVELS=-1 salvoxia/immich-folder-album-creator:latest /script/immich_auto_album.sh
 
