@@ -1,5 +1,0 @@
-#!/bin/bash
-bw config server https://bw.adebenham.com/
-export BW_SESSION=$(bw login chris@adebenham.com --raw)
-bw "$@"
-bw logout
