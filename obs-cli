@@ -1,0 +1,2 @@
+#!/bin/sh
+~/Sync/bin/x86_64/obs-cmd --websocket obsws://localhost:4444/ "$@"
