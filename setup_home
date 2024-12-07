@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=2046,2001
 DATE=$(date +%Y%m%d)
 BASEDIR=~/Sync
 UNAME=$(uname -m)
@@ -32,6 +33,7 @@ function install_pkgs() {
     # Filtering out non-installable packages
     if [ -e /usr/bin/dpkg ]; then
       PKGS="$(echo "$PKGS" | tr ' ' '\n' | sort )"
+      # shellcheck disable=2086
       AVAIL="$(apt-cache --generate pkgnames \
         | grep --line-regexp --fixed-strings \
         -e $(echo $PKGS | sed -e 's/ / -e /g') | sort )"
@@ -43,6 +45,7 @@ function install_pkgs() {
     fi
     if [ -e /usr/bin/pacman ]; then
       sudo pacman -Sy
+      # shellcheck disable=2086
       AVAIL=$(pacman -Si $PKGS | grep "^Name" | sed -e 's/^.* : //g' | tr '\n' ' ' 2>/dev/null)
       echo "Unable to install $(diff <(echo "$PKGS") <(echo "$AVAIL") | grep "^<" | sed -e 's/< //g' | tr '\n' ' ')"
       if [ "$AVAIL" ]; then
@@ -159,15 +162,6 @@ find ~ -maxdepth 1 -xtype l -exec rm "{}" \;
 find ~/.config -maxdepth 1 -xtype l -exec rm "{}" \;
 find ~/.local/share -maxdepth 1 -xtype l -exec rm "{}" \;
 
-#echo Updating alternatives
-#for L in ex vi view vim vimdiff; do
-#	if [[ ! "$(readlink -f /etc/alternatives/$L)" == *"Sync"* ]]; then
-#		echo Update Alternatives
-#		sudo update-alternatives --install /usr/bin/$L $L "$HOME/Sync/bin/$UNAME/nvim" 110
-#		sudo update-alternatives --set $L "$HOME/Sync/bin/$UNAME/nvim"
-#	fi
-#done
-
 # Clean links
 rm ~/.*-"${DATE}" ~/.config/*-"${DATE}" ~/.local/share/*-"${DATE}" 2>/dev/null
 
@@ -175,6 +169,13 @@ echo Setting shell
 if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
 	echo Set zsh as shell
 	sudo usermod -s /usr/bin/zsh "$(whoami)"
+fi
+
+# shellcheck disable=2046
+if [[ $(~/Sync/bin/$(uname -m)/atuin status) =~ "not logged in" ]]; then
+  echo Setup Atuin
+  atuin login -u cjd
+  atuin sync
 fi
 
 if [ "$USER" == "abc" ]; then
