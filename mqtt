@@ -1,2 +1,2 @@
 #!/bin/sh
-mqttui -b mqtt://ha -u ha --password ha
+mqttui -b mqtt://192.168.0.20 -u ha --password ha
