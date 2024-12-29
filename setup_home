@@ -6,19 +6,22 @@ UNAME=$(uname -m)
 FORCE=""
 INSTALL_CHROME=""
 USER=$(whoami)
+DISTRO="unknown"
+if command -v dpkg &>/dev/null; then DISTRO=debian;fi
+if command -v pacman &>/dev/null; then DISTRO=arch;fi
+if [ $DISTRO = unknown ];then echo Unknown distro - exiting;exit;fi
 if [ "$1" = "force" ]; then
 	FORCE="$1"
 fi
 
 function pkg_installed() {
   P="$1"
-  if [ -e /usr/bin/dpkg ]; then
+  if [ $DISTRO = debian ]; then
     if ! dpkg-query -s "$P" 2>/dev/null | grep -q ' install ok'; then
       return 1
     else return 0
     fi
-  fi
-  if [ -e /usr/bin/pacman ]; then
+  elif [ $DISTRO = arch ]; then
     if pacman -Q "$P" 2>/dev/null >/dev/null; then
       true
     else false
@@ -31,7 +34,7 @@ function install_pkgs() {
   if [ "$PKGS" ]; then
 	  echo Installing "$PKGS"
     # Filtering out non-installable packages
-    if [ -e /usr/bin/dpkg ]; then
+    if [ $DISTRO = debian ]; then
       PKGS="$(echo "$PKGS" | tr ' ' '\n' | sort )"
       # shellcheck disable=2086
       AVAIL="$(apt-cache --generate pkgnames \
@@ -42,8 +45,7 @@ function install_pkgs() {
 	      echo Actually Installing "$AVAIL"
         sudo apt -y install $(echo "$AVAIL" | tr '\n' ' ')
       fi
-    fi
-    if [ -e /usr/bin/pacman ]; then
+    elif [ $DISTRO = arch ]; then
       sudo pacman -Sy
       # shellcheck disable=2086
       AVAIL=$(pacman -Si $PKGS | grep "^Name" | sed -e 's/^.* : //g' | tr '\n' ' ' 2>/dev/null)
@@ -58,7 +60,11 @@ function install_pkgs() {
 
 if ! command -v sudo &>/dev/null; then
 	echo Installing sudo
-	su root -c "apt install sudo"
+  if [ $DISTRO = debian ]; then
+    su root -c "apt install sudo";
+  elif [ $DISTRO = arch ]; then
+    su root -c "pacman -S sudo";
+  fi
 	su root -c "sed --in-place -e 's/^\(sudo.*\):\(.*\)$/\1:$USER,\2/g' /etc/group"
 	echo Sudo installed - you may need to relogin
 	exit
@@ -75,7 +81,7 @@ for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3
 	fi
 done
 
-if [ "$USER" != "abc" ]; then
+if [ "$USER" != "abc" ]; then # Skip in webtop
   if command -v Xwayland >/dev/null; then
 	  for P in wtype sway swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
 	    if ! pkg_installed $P; then
@@ -97,14 +103,26 @@ fi
 
 install_pkgs "$PKGS"
 
+if [ $DISTRO = arch ]; then
+  if ! command -v yay &>/dev/null; then
+    pushd /tmp || exit
+    sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay-bin.git && cd yay-bin && makepkg -si
+    popd || exit
+  fi
+fi
+
 if [ "$INSTALL_CHROME" = "Y" ]; then
-	if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
-		echo Installing chrome
-		wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-		sudo dpkg -i ./google-chrome-stable_current_amd64.deb
-		rm ./google-chrome-stable_current_amd64.deb
-		sudo apt-get -f -y install
-	fi
+  if [ $DISTRO = debian ]; then
+	  if ! dpkg-query -s google-chrome-stable 2>/dev/null | grep -q 'install ok'; then
+		  echo Installing chrome
+		  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+		  sudo dpkg -i ./google-chrome-stable_current_amd64.deb
+		  rm ./google-chrome-stable_current_amd64.deb
+		  sudo apt-get -f -y install
+	  fi
+  elif [ $DISTRO = arch ]; then
+    yay google-chrome
+  fi
 fi
 
 echo Ensuring Sync directory exists
