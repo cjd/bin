@@ -2,7 +2,7 @@
 PICDIR=/tank/Pictures/Various
 SYNCDIR=/home/cjd/Sync/Pictures-for-gphoto
 
-sync_file()
+convert_file()
 {
   SOURCE="$1"
   IMGNAME=""
@@ -14,8 +14,7 @@ sync_file()
       # shellcheck disable=2001
       TARGET="$(echo "${IMGNAME}" | sed -e 's/\.[^.]*$//g').mp4"
       if [ ! -s "${TARGET}" ] || [ "${SOURCE}" -nt "${TARGET}" ]; then
-        echo Converting "$IMGNAME"
-        #ffmpeg -v error -i "${SOURCE}" -vf scale=-4:720 -map 0:0 -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
+        echo Converting ":${IMGNAME}:"
         ffmpeg -v error -i "${SOURCE}" -vf scale=-4:720 -dn -c:v libx265 -crf 28 -preset fast -c:a aac -b:a 128k -map_metadata 0 "${TARGET}"
         touch -c -r "${SOURCE}" "${TARGET}"
       fi
@@ -30,6 +29,7 @@ sync_file()
         if [ ! -d "$DIRNAME" ];then mkdir "$DIRNAME";fi
         convert "${SOURCE}[0]" -quality 85 -resize 2048x2048 "${TARGET}"
         exiv2 -ea- "${SOURCE}" | exiv2 -ia- "${TARGET}"
+        exiv2 -M "set Exif.Image.Orientation 1" "${TARGET}" # Fix rotation
         touch -r "${SOURCE}" "${TARGET}"
       fi
       ;;
@@ -52,7 +52,7 @@ find "$DIR" -type d | sort | while read -r SOURCEDIR; do
   echo Syncing "$SOURCEDIR"
   DESTDIR="${SYNCDIR}/$(basename "$SOURCEDIR")"
   find "$SOURCEDIR" -type f -maxdepth 1 | while read -r SOURCE; do
-    sync_file "$SOURCE"
+    convert_file "$SOURCE"
   done
   echo
   pushd "$SOURCEDIR" >/dev/null || exit
