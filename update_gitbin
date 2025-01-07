@@ -59,7 +59,7 @@ function grab_bin() {
     fi
     if [ "$ARCH" = "x86_64" ]; then SA="x86_64\|amd64\|appimage"; fi
     if [ "$ARCH" = "aarch64" ]; then SA="aarch64\|arm64"; fi
-    grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk|sha256|json|blockma|yml|musl|update" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | while read -r DOWN
+    grep "download_url" "$BASE/$REPO/release" | grep -i -E "linux|AppImage" | grep -i -e "$SA" | grep -v -E "deb|rpm|apk|sha256|json|blockma|yml|musl|update|asc" | sed -e 's/^.*\(https.*\)".*$/\1/g' | sort | while read -r DOWN
     do if [ -n "$DOWN" ]; then
         cd "$BASE/$REPO" || return
         mkdir $ARCH 2>/dev/null
