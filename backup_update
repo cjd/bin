@@ -15,21 +15,21 @@ dirs["Television"]=""
 dirs["Virtual"]=""
 dirs["Volumes"]="--exclude immich/thumbs --exclude immich/encoded-video"
 
-# shellcheck disable=2154
-for MNT in /media/*/*; do
-	echo -n "Update ${MNT}? "
-	read -r CHECK
-	if [ "$CHECK" != "n" ]; then
-    for DIR in "${!dirs[@]}"; do
-      if [ -n "$1" ] && [ "$1" != "$DIR" ]; then continue;fi
-      echo "Updating $DIR with options: ${dirs[$DIR]}"
-      ionice -c 3 sudo rsync -av --delete-during ${dirs[$DIR]} "/tank/${DIR}/" "${MNT}/${DIR}/"
-      results[$DIR]="$?"
-    done
-	fi
-done
+echo -n "Update ${1}? "
+read -r CHECK
+sudo mount "$1" /mnt
+MNT=/mnt
+if [ "$CHECK" != "n" ]; then
+  for DIR in "${!dirs[@]}"; do
+    if [ -n "$2" ] && [ "$2" != "$DIR" ]; then continue;fi
+    echo "Updating $DIR with options: ${dirs[$DIR]}"
+    ionice -c 3 sudo rsync -av --delete-during ${dirs[$DIR]} "/tank/${DIR}/" "${MNT}/${DIR}/"
+    results[$DIR]="$?"
+  done
+fi
 echo Return codes:
 for DIR in "${!dirs[@]}"; do
   echo "$DIR ${results[$DIR]}"
 done
+sudo umount /mnt
 echo Done
