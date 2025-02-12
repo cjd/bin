@@ -2,7 +2,7 @@
 if [ "$1" = "c3" ]
 then shift
     K="c3 `kubectl get pod -n c3 | grep -E 'Running|Init' | grep $1 | head -n1`"
-else K=`kubectl get pod -A | grep -v "^c3" | grep -E 'Running|Init' | grep $1 | head -n1`
+else K=`kubectl get pod -A | grep -v "^c3" | grep -E 'Running|Init|CrashLoopBackOff|Init' | grep $1 | head -n1`
 fi
 NS=`echo $K | sed -e 's/^\([^ ]*\) .*$/\1/g'`
 POD=`echo $K | sed -e 's/^[^ ]* *\([^ ]*\) *.*$/\1/g'`
