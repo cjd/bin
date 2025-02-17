@@ -17,19 +17,24 @@ dirs["Volumes"]="--exclude immich/thumbs --exclude immich/encoded-video"
 
 echo -n "Update ${1}? "
 read -r CHECK
-sudo mount "$1" /mnt
-MNT=/mnt
 if [ "$CHECK" != "n" ]; then
+  MNT=/mnt
+  sudo mount "$1" $MNT
+  DATE=$(date +%F)
+  if [ ! -d "${MNT}/snap/${DATE}" ]; then 
+    sudo btrfs subvolume snapshot $MNT "${MNT}/snap/${DATE}"
+  fi
   for DIR in "${!dirs[@]}"; do
     if [ -n "$2" ] && [ "$2" != "$DIR" ]; then continue;fi
     echo "Updating $DIR with options: ${dirs[$DIR]}"
+    # shellcheck disable=2086
     ionice -c 3 sudo rsync -av --delete-during ${dirs[$DIR]} "/tank/${DIR}/" "${MNT}/${DIR}/"
     results[$DIR]="$?"
   done
+  sudo umount /mnt
+  echo Return codes:
+  for DIR in "${!dirs[@]}"; do
+    echo "$DIR ${results[$DIR]}"
+  done
 fi
-echo Return codes:
-for DIR in "${!dirs[@]}"; do
-  echo "$DIR ${results[$DIR]}"
-done
-sudo umount /mnt
 echo Done
