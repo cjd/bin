@@ -1,6 +1,7 @@
 #!/bin/sh
 QUAL="H.265 MKV 480p30"
 if [ "$1" = "hd" ]; then QUAL="H.265 MKV 720p30";shift;fi
+if [ "$1" = "fhd" ]; then QUAL="H.265 MKV 1080p30";shift;fi
 for V in "$@"
   do nice -n 19 HandBrakeCLI -Z "${QUAL}" --all-subtitles -i "$V" -o ".$V.smaller.mkv"
   mv "$V" ".$V-orig.mkv"
