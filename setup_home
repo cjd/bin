@@ -81,9 +81,9 @@ for P in vim-tiny git zsh htop curl ripgrep openssh-server build-essential fuse3
 	fi
 done
 
-if [ "$USER" != "abc" ]; then # Skip in webtop
+if [ "$USER" != "abc" ] && [ "$GTK_IM_MODULE" != "cros" ]; then # Skip in webtop
   if command -v Xwayland >/dev/null; then
-	  for P in wtype sway swaylock grimshot grim slurp swayidle waybar wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad; do
+	  for P in wtype sway swaylock grimshot grim slurp swayidle wdisplays wl-mirror wlr-randr xdg-desktop-portal-wlr clipman sway-notification-center wofi yad i3blocks; do
 	    if ! pkg_installed $P; then
 			  PKGS+="$P "
 		  fi
